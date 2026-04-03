@@ -14,15 +14,72 @@
       getDoc, updateDoc, Timestamp
     } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
+      FIREBASE INIT WITH SECRET CODE
+   ══════════════════════════════════════════════════════════════ */
+
+function waitFirebase(cb) {
+  if (window.firebaseReady) { cb(); }
+  else { document.addEventListener('firebaseReady', cb, { once: true }); }
+}
+
+waitFirebase(() => {
+  // --- SYSTÈME DE CODE SECRET ---
+  let monCodeSecret = localStorage.getItem('mon_projet_secret_key');
+
+  if (!monCodeSecret) {
+    monCodeSecret = prompt("🔑 Entrez votre code d'accès personnel :");
+    if (monCodeSecret) {
+      localStorage.setItem('mon_projet_secret_key', monCodeSecret);
+    }
+  }
+
+  if (monCodeSecret) {
+    // On passe le code secret aux fonctions de lecture
+    listenProcesses(monCodeSecret);
+    listenInterviews(monCodeSecret);
+  } else {
+    console.error("Accès refusé : Aucun code fourni.");
+  }
+});
+
+function listenProcesses(code) {
+  // On crée un chemin dynamique : /CODE/processes
+  const col = window._col(code + '/processes');
+  window._onSnapshot(col, snap => {
+    processes = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    renderList();
+  });
+}
+
+function listenInterviews(code) {
+  // On crée un chemin dynamique : /CODE/interviews
+  const col = window._col(code + '/interviews');
+  window._onSnapshot(col, snap => {
+    interviews = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    renderList();
+    if (currentDetailId) renderDetail(currentDetailId);
+  });
+}
+
     // ─── FIREBASE CONFIG — Remplacez par votre propre config ───────────────────
-    const firebaseConfig = {
-      apiKey: "YOUR_API_KEY",
-      authDomain: "YOUR_PROJECT.firebaseapp.com",
-      projectId: "YOUR_PROJECT_ID",
-      storageBucket: "YOUR_PROJECT.appspot.com",
-      messagingSenderId: "YOUR_SENDER_ID",
-      appId: "YOUR_APP_ID"
-    };
+// Import the functions you need from the SDKs you need
+import { initializeApp } from "firebase/app";
+import { getAnalytics } from "firebase/analytics";
+// TODO: Add SDKs for Firebase products that you want to use
+// https://firebase.google.com/docs/web/setup#available-libraries
+
+// Your web app's Firebase configuration
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+const firebaseConfig = {
+  apiKey: "AIzaSyCiVz4-sUKNDydb8o7_uqewUCBhQeNjNKw",
+  authDomain: "postul-on.firebaseapp.com",
+  databaseURL: "https://postul-on-default-rtdb.europe-west1.firebasedatabase.app/",
+  projectId: "postul-on",
+  storageBucket: "postul-on.firebasestorage.app",
+  messagingSenderId: "227373874590",
+  appId: "1:227373874590:web:10f68b90ec723564eb2a8f",
+  measurementId: "G-M74PJNVFGW"
+};
     // ───────────────────────────────────────────────────────────────────────────
 
     const app = initializeApp(firebaseConfig);
