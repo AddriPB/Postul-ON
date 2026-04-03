@@ -14,25 +14,7 @@
       updateDoc, deleteDoc, query, orderBy, onSnapshot, Timestamp
     } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-    // ─── FIREBASE CONFIG — Remplacez par votre propre config ───────────────────
-// Import the functions you need from the SDKs you need
-import { initializeApp } from "firebase/app";
-import { getAnalytics } from "firebase/analytics";
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
 
-// Your web app's Firebase configuration
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
-const firebaseConfig = {
-  apiKey: "AIzaSyCiVz4-sUKNDydb8o7_uqewUCBhQeNjNKw",
-  authDomain: "postul-on.firebaseapp.com",
-  databaseURL: "https://postul-on-default-rtdb.europe-west1.firebasedatabase.app",
-  projectId: "postul-on",
-  storageBucket: "postul-on.firebasestorage.app",
-  messagingSenderId: "227373874590",
-  appId: "1:227373874590:web:10f68b90ec723564eb2a8f",
-  measurementId: "G-M74PJNVFGW"
-};
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
@@ -680,6 +662,26 @@ function listenInterviews(code) {
     if (currentDetailId) renderDetail(currentDetailId);
   });
 }
+
+    // ─── FIREBASE CONFIG — Remplacez par votre propre config ───────────────────
+// Import the functions you need from the SDKs you need
+import { initializeApp } from "firebase/app";
+import { getAnalytics } from "firebase/analytics";
+// TODO: Add SDKs for Firebase products that you want to use
+// https://firebase.google.com/docs/web/setup#available-libraries
+
+// Your web app's Firebase configuration
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+const firebaseConfig = {
+  apiKey: "AIzaSyCiVz4-sUKNDydb8o7_uqewUCBhQeNjNKw",
+  authDomain: "postul-on.firebaseapp.com",
+  databaseURL: "https://postul-on-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "postul-on",
+  storageBucket: "postul-on.firebasestorage.app",
+  messagingSenderId: "227373874590",
+  appId: "1:227373874590:web:10f68b90ec723564eb2a8f",
+  measurementId: "G-M74PJNVFGW"
+};
 
 /* ════════════════════════════════════════════════════════════
    HELPERS
