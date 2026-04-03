@@ -6,35 +6,36 @@
   <title>Postul'ON — Suivi Recrutement</title>
   <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
 
-  <!-- Firebase SDK -->
+  <!-- Firebase SDK (module) -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import {
-      getFirestore, collection, addDoc, getDocs, doc,
-      updateDoc, deleteDoc, query, orderBy, onSnapshot, Timestamp
+      getFirestore, collection, addDoc, doc,
+      updateDoc, deleteDoc, onSnapshot, Timestamp
     } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-
-
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
-    // ───────────────────────────────────────────────────────────────────────────
+    const firebaseConfig = {
+      apiKey: "AIzaSyCiVz4-sUKNDydb8o7_uqewUCBhQeNjNKw",
+      authDomain: "postul-on.firebaseapp.com",
+      projectId: "postul-on",
+      storageBucket: "postul-on.firebasestorage.app",
+      messagingSenderId: "227373874590",
+      appId: "1:227373874590:web:10f68b90ec723564eb2a8f"
+    };
 
     const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
+    const db  = getFirestore(app);
 
-    window._db = db;
-    window._col = (name) => collection(db, name);
-    window._addDoc = addDoc;
-    window._getDocs = getDocs;
-    window._doc = (path, ...args) => doc(db, path, ...args);
-    window._updateDoc = updateDoc;
-    window._deleteDoc = deleteDoc;
-    window._query = query;
-    window._orderBy = orderBy;
+    // Expose raw Firestore functions to main script
+    window._db         = db;
+    window._collection = collection;
+    window._addDoc     = addDoc;
+    window._doc        = doc;
+    window._updateDoc  = updateDoc;
+    window._deleteDoc  = deleteDoc;
     window._onSnapshot = onSnapshot;
-    window._Timestamp = Timestamp;
+    window._Timestamp  = Timestamp;
+
     window.firebaseReady = true;
     document.dispatchEvent(new Event("firebaseReady"));
   </script>
@@ -51,14 +52,10 @@ const analytics = getAnalytics(app);
       --blue-200: #93c5fd;
       --blue-100: #dbeafe;
       --blue-50:  #eff6ff;
-
-      --accent: #3b82f6;
-      --accent-glow: rgba(59,130,246,0.35);
       --gold: #f0c040;
       --success: #22c55e;
       --danger: #ef4444;
       --warning: #f59e0b;
-
       --bg: #f0f4f9;
       --surface: #ffffff;
       --surface-2: #f8faff;
@@ -66,22 +63,17 @@ const analytics = getAnalytics(app);
       --text-primary: #0a1628;
       --text-secondary: #4b6b9a;
       --text-muted: #94adc7;
-
       --radius-sm: 10px;
       --radius-md: 16px;
       --radius-lg: 24px;
       --radius-xl: 32px;
-
       --shadow-sm: 0 2px 8px rgba(10,22,40,0.06);
       --shadow-md: 0 4px 20px rgba(10,22,40,0.10);
       --shadow-lg: 0 8px 32px rgba(10,22,40,0.14);
       --shadow-accent: 0 4px 20px rgba(59,130,246,0.30);
-
       --font: 'Quicksand', sans-serif;
     }
-
     * { box-sizing: border-box; margin: 0; padding: 0; }
-
     body {
       font-family: var(--font);
       background: var(--bg);
@@ -89,10 +81,8 @@ const analytics = getAnalytics(app);
       min-height: 100vh;
       max-width: 430px;
       margin: 0 auto;
-      position: relative;
       overflow-x: hidden;
     }
-
     ::-webkit-scrollbar { width: 4px; }
     ::-webkit-scrollbar-track { background: transparent; }
     ::-webkit-scrollbar-thumb { background: var(--blue-200); border-radius: 4px; }
@@ -100,136 +90,122 @@ const analytics = getAnalytics(app);
     /* ── HEADER ── */
     .header {
       background: linear-gradient(145deg, var(--blue-900) 0%, var(--blue-700) 50%, var(--blue-500) 100%);
-      padding: 52px 24px 28px;
+      padding: 36px 20px 18px;
       position: relative;
       overflow: hidden;
     }
     .header::before {
-      content: '';
-      position: absolute;
+      content: ''; position: absolute;
       top: -60px; right: -60px;
-      width: 200px; height: 200px;
+      width: 180px; height: 180px;
       background: radial-gradient(circle, rgba(59,130,246,0.25) 0%, transparent 70%);
       border-radius: 50%;
     }
-    .header::after {
-      content: '';
-      position: absolute;
-      bottom: -30px; left: -30px;
-      width: 140px; height: 140px;
-      background: radial-gradient(circle, rgba(59,130,246,0.15) 0%, transparent 70%);
-      border-radius: 50%;
-    }
     .header-inner { position: relative; z-index: 1; }
-    .logo-row { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; }
+
+    .header-top {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 14px;
+    }
+    .logo-row { display: flex; align-items: center; gap: 8px; }
     .logo-icon {
-      width: 36px; height: 36px;
+      width: 30px; height: 30px;
       background: linear-gradient(135deg, var(--blue-300), var(--blue-400));
-      border-radius: 10px;
+      border-radius: 8px;
       display: flex; align-items: center; justify-content: center;
       box-shadow: var(--shadow-accent);
     }
-    .logo-icon svg { width: 20px; height: 20px; fill: white; }
-    .logo-text { font-size: 22px; font-weight: 700; color: white; letter-spacing: -0.5px; }
+    .logo-icon svg { width: 16px; height: 16px; fill: white; }
+    .logo-text { font-size: 18px; font-weight: 700; color: white; letter-spacing: -0.3px; }
     .logo-text .logo-on { color: var(--gold); }
-    .header-title { font-size: 13px; font-weight: 500; color: var(--blue-200); margin-bottom: 4px; letter-spacing: 0.5px; text-transform: uppercase; }
-    .header-count { font-size: 32px; font-weight: 700; color: white; line-height: 1; }
-    .header-sub { font-size: 13px; color: var(--blue-200); margin-top: 4px; font-weight: 500; }
 
-    .stats-row { display: flex; gap: 12px; margin-top: 20px; flex-wrap: wrap; }
+    .logout-btn {
+      background: rgba(255,255,255,0.12);
+      border: 1px solid rgba(255,255,255,0.18);
+      border-radius: 8px;
+      width: 30px; height: 30px;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; transition: background 0.15s;
+    }
+    .logout-btn:hover { background: rgba(255,255,255,0.20); }
+    .logout-btn svg { width: 15px; height: 15px; stroke: rgba(255,255,255,0.75); stroke-width: 2; fill: none; }
+
+    .header-title { font-size: 11px; font-weight: 500; color: var(--blue-200); margin-bottom: 2px; letter-spacing: 0.5px; text-transform: uppercase; }
+    .header-count { font-size: 28px; font-weight: 700; color: white; line-height: 1; }
+    .header-sub { font-size: 12px; color: var(--blue-200); margin-top: 2px; font-weight: 500; }
+
+    .stats-row { display: flex; gap: 8px; margin-top: 14px; flex-wrap: wrap; }
     .stat-pill {
       background: rgba(255,255,255,0.10);
       border: 1px solid rgba(255,255,255,0.15);
-      border-radius: 20px;
-      padding: 6px 14px;
-      display: flex; align-items: center; gap: 6px;
-      font-size: 12px; font-weight: 600; color: white;
+      border-radius: 20px; padding: 5px 12px;
+      display: flex; align-items: center; gap: 5px;
+      font-size: 11px; font-weight: 600; color: white;
     }
-    .stat-pill .dot { width: 7px; height: 7px; border-radius: 50%; }
-    .dot-green { background: var(--success); box-shadow: 0 0 6px var(--success); }
+    .stat-pill .dot { width: 6px; height: 6px; border-radius: 50%; }
+    .dot-green { background: var(--success); box-shadow: 0 0 5px var(--success); }
     .dot-yellow { background: var(--warning); }
     .dot-blue { background: var(--blue-300); }
 
     /* ── FAB ── */
     .fab {
-      position: fixed;
-      bottom: 28px; right: 24px;
-      width: 58px; height: 58px;
+      position: fixed; bottom: 24px; right: 20px;
+      width: 54px; height: 54px;
       background: linear-gradient(135deg, var(--blue-400), var(--blue-300));
       border: none; border-radius: 50%;
       cursor: pointer;
       display: flex; align-items: center; justify-content: center;
       box-shadow: var(--shadow-accent), 0 4px 16px rgba(59,130,246,0.5);
       z-index: 100;
-      transition: transform 0.2s, box-shadow 0.2s;
+      transition: transform 0.2s;
     }
-    .fab:active { transform: scale(0.93); }
-    .fab svg { width: 24px; height: 24px; stroke: white; stroke-width: 2.5; fill: none; }
+    .fab:active { transform: scale(0.92); }
+    .fab svg { width: 22px; height: 22px; stroke: white; stroke-width: 2.5; fill: none; }
 
     /* ── CONTENT ── */
-    .content { padding: 0 16px 100px; }
-
-    /* ── SECTION TITLE ── */
+    .content { padding: 0 14px 96px; }
     .section-title {
-      font-size: 11px; font-weight: 700;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      padding: 20px 8px 10px;
+      font-size: 11px; font-weight: 700; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 1px;
+      padding: 18px 6px 8px;
     }
 
     /* ── PROCESS CARD ── */
     .process-card {
-      background: var(--surface);
-      border-radius: var(--radius-lg);
-      padding: 16px;
-      margin-bottom: 10px;
-      box-shadow: var(--shadow-sm);
-      border: 1px solid var(--border);
-      display: flex;
-      align-items: center;
-      gap: 14px;
-      cursor: pointer;
-      transition: transform 0.15s, box-shadow 0.15s;
-      position: relative;
-      overflow: hidden;
+      background: var(--surface); border-radius: var(--radius-lg);
+      padding: 14px; margin-bottom: 10px;
+      box-shadow: var(--shadow-sm); border: 1px solid var(--border);
+      display: flex; align-items: center; gap: 12px;
+      cursor: pointer; transition: transform 0.15s, box-shadow 0.15s;
+      position: relative; overflow: hidden;
     }
     .process-card:active { transform: scale(0.985); }
     .process-card:hover { box-shadow: var(--shadow-md); }
-    .process-card .left-accent {
-      position: absolute; left: 0; top: 0; bottom: 0;
-      width: 4px;
-      border-radius: 4px 0 0 4px;
-    }
-    .accent-active { background: var(--accent); }
+    .left-accent { position: absolute; left: 0; top: 0; bottom: 0; width: 4px; border-radius: 4px 0 0 4px; }
+    .accent-active { background: var(--blue-300); }
     .accent-pending { background: var(--warning); }
     .accent-done { background: var(--success); }
     .accent-none { background: var(--blue-200); }
 
     .company-logo {
-      width: 48px; height: 48px;
-      border-radius: var(--radius-sm);
+      width: 44px; height: 44px; border-radius: var(--radius-sm);
       background: linear-gradient(135deg, var(--blue-100), var(--blue-50));
       border: 1px solid var(--border);
       display: flex; align-items: center; justify-content: center;
-      font-size: 18px; font-weight: 700;
-      color: var(--blue-500);
-      overflow: hidden;
-      flex-shrink: 0;
+      font-size: 16px; font-weight: 700; color: var(--blue-500);
+      overflow: hidden; flex-shrink: 0;
     }
     .company-logo img { width: 100%; height: 100%; object-fit: contain; }
 
     .card-info { flex: 1; min-width: 0; }
-    .card-company { font-size: 15px; font-weight: 700; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .card-company { font-size: 14px; font-weight: 700; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .card-meta { font-size: 12px; color: var(--text-secondary); margin-top: 2px; font-weight: 500; }
-    .card-next { font-size: 11px; margin-top: 6px; display: flex; align-items: center; gap: 4px; }
-    .card-next svg { width: 12px; height: 12px; flex-shrink: 0; }
+    .card-next { font-size: 11px; margin-top: 4px; display: flex; align-items: center; gap: 4px; }
+    .card-next svg { width: 11px; height: 11px; flex-shrink: 0; }
 
     .card-badge {
-      padding: 4px 10px;
-      border-radius: 20px;
-      font-size: 11px; font-weight: 700;
-      white-space: nowrap;
+      padding: 4px 9px; border-radius: 20px;
+      font-size: 10px; font-weight: 700; white-space: nowrap;
     }
     .badge-active { background: var(--blue-50); color: var(--blue-400); border: 1px solid var(--blue-100); }
     .badge-soon   { background: #fff7ed; color: #ea580c; border: 1px solid #fed7aa; }
@@ -240,24 +216,22 @@ const analytics = getAnalytics(app);
     /* ── EMPTY STATE ── */
     .empty-state { text-align: center; padding: 48px 24px; }
     .empty-icon {
-      width: 80px; height: 80px;
+      width: 72px; height: 72px;
       background: linear-gradient(135deg, var(--blue-100), var(--blue-50));
-      border-radius: 50%; margin: 0 auto 20px;
+      border-radius: 50%; margin: 0 auto 16px;
       display: flex; align-items: center; justify-content: center;
     }
-    .empty-icon svg { width: 36px; height: 36px; stroke: var(--blue-300); stroke-width: 1.5; fill: none; }
-    .empty-title { font-size: 18px; font-weight: 700; color: var(--text-primary); margin-bottom: 8px; }
-    .empty-sub { font-size: 14px; color: var(--text-secondary); font-weight: 500; line-height: 1.5; }
+    .empty-icon svg { width: 32px; height: 32px; stroke: var(--blue-300); stroke-width: 1.5; fill: none; }
+    .empty-title { font-size: 17px; font-weight: 700; color: var(--text-primary); margin-bottom: 6px; }
+    .empty-sub { font-size: 13px; color: var(--text-secondary); font-weight: 500; line-height: 1.5; }
 
-    /* ── MODAL OVERLAY ── */
+    /* ── OVERLAY / SHEET ── */
     .overlay {
       position: fixed; inset: 0;
       background: rgba(10,22,40,0.55);
       backdrop-filter: blur(4px);
-      z-index: 200;
-      display: none;
-      align-items: flex-end;
-      justify-content: center;
+      z-index: 200; display: none;
+      align-items: flex-end; justify-content: center;
     }
     .overlay.open { display: flex; animation: overlayIn 0.2s ease; }
     @keyframes overlayIn { from { opacity: 0; } to { opacity: 1; } }
@@ -266,64 +240,50 @@ const analytics = getAnalytics(app);
       background: var(--surface);
       width: 100%; max-width: 430px;
       border-radius: var(--radius-xl) var(--radius-xl) 0 0;
-      max-height: 92vh;
-      overflow-y: auto;
+      max-height: 92vh; overflow-y: auto;
       animation: sheetIn 0.3s cubic-bezier(0.34,1.20,0.64,1);
     }
-    @keyframes sheetIn {
-      from { transform: translateY(100%); }
-      to   { transform: translateY(0); }
-    }
+    @keyframes sheetIn { from { transform: translateY(100%); } to { transform: translateY(0); } }
+
     .sheet-handle {
-      width: 40px; height: 4px;
-      background: var(--border);
-      border-radius: 2px;
-      margin: 14px auto 0;
+      width: 40px; height: 4px; background: var(--border);
+      border-radius: 2px; margin: 12px auto 0;
     }
     .sheet-header {
-      padding: 20px 24px 16px;
+      padding: 16px 20px 14px;
       border-bottom: 1px solid var(--border);
-      display: flex; align-items: center; gap: 12px;
+      display: flex; align-items: center; gap: 10px;
     }
     .sheet-icon {
-      width: 40px; height: 40px;
+      width: 36px; height: 36px;
       background: linear-gradient(135deg, var(--blue-100), var(--blue-50));
       border-radius: var(--radius-sm);
-      display: flex; align-items: center; justify-content: center;
-      flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
     }
-    .sheet-icon svg { width: 20px; height: 20px; stroke: var(--blue-400); stroke-width: 2; fill: none; }
-    .sheet-title { font-size: 18px; font-weight: 700; color: var(--text-primary); }
-    .sheet-subtitle { font-size: 12px; color: var(--text-secondary); font-weight: 500; }
+    .sheet-icon svg { width: 18px; height: 18px; stroke: var(--blue-400); stroke-width: 2; fill: none; }
+    .sheet-title { font-size: 17px; font-weight: 700; color: var(--text-primary); }
+    .sheet-subtitle { font-size: 11px; color: var(--text-secondary); font-weight: 500; }
     .sheet-close {
-      margin-left: auto; background: none; border: none;
-      width: 32px; height: 32px; border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
-      cursor: pointer; background: var(--surface-2);
+      margin-left: auto; background: var(--surface-2); border: none;
+      width: 30px; height: 30px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center; cursor: pointer;
     }
-    .sheet-close svg { width: 16px; height: 16px; stroke: var(--text-secondary); stroke-width: 2; fill: none; }
-    .sheet-body { padding: 20px 24px 32px; }
+    .sheet-close svg { width: 14px; height: 14px; stroke: var(--text-secondary); stroke-width: 2; fill: none; }
+    .sheet-body { padding: 18px 20px 30px; }
 
     /* ── FORM ── */
-    .form-group { margin-bottom: 18px; }
+    .form-group { margin-bottom: 16px; }
     .form-label {
-      display: block;
-      font-size: 12px; font-weight: 700;
-      color: var(--text-secondary);
-      text-transform: uppercase; letter-spacing: 0.5px;
-      margin-bottom: 8px;
+      display: block; font-size: 11px; font-weight: 700;
+      color: var(--text-secondary); text-transform: uppercase;
+      letter-spacing: 0.5px; margin-bottom: 7px;
     }
     .form-input, .form-select, .form-textarea {
-      width: 100%;
-      padding: 13px 16px;
-      border: 1.5px solid var(--border);
-      border-radius: var(--radius-md);
-      font-family: var(--font);
-      font-size: 14px; font-weight: 500;
-      color: var(--text-primary);
-      background: var(--surface-2);
-      outline: none;
-      transition: border-color 0.2s, box-shadow 0.2s;
+      width: 100%; padding: 12px 14px;
+      border: 1.5px solid var(--border); border-radius: var(--radius-md);
+      font-family: var(--font); font-size: 14px; font-weight: 500;
+      color: var(--text-primary); background: var(--surface-2);
+      outline: none; transition: border-color 0.2s, box-shadow 0.2s;
       -webkit-appearance: none;
     }
     .form-input:focus, .form-select:focus, .form-textarea:focus {
@@ -331,163 +291,117 @@ const analytics = getAnalytics(app);
       box-shadow: 0 0 0 3px rgba(59,130,246,0.12);
       background: var(--surface);
     }
-    .form-textarea { resize: none; height: 80px; }
-    .form-select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%234b6b9a' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; padding-right: 36px; }
+    .form-textarea { resize: none; height: 78px; }
+    .form-select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%234b6b9a' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; padding-right: 34px; }
 
     /* ── BUTTONS ── */
     .btn {
-      display: flex; align-items: center; justify-content: center; gap: 8px;
-      padding: 14px 20px;
-      border: none; border-radius: var(--radius-md);
+      display: flex; align-items: center; justify-content: center; gap: 7px;
+      padding: 13px 18px; border: none; border-radius: var(--radius-md);
       font-family: var(--font); font-size: 14px; font-weight: 700;
-      cursor: pointer; transition: transform 0.15s, box-shadow 0.15s, opacity 0.15s;
+      cursor: pointer; transition: transform 0.15s, box-shadow 0.15s;
       width: 100%;
     }
     .btn:active { transform: scale(0.97); }
-    .btn svg { width: 16px; height: 16px; flex-shrink: 0; }
-    .btn-primary {
-      background: linear-gradient(135deg, var(--blue-400), var(--blue-300));
-      color: white; box-shadow: var(--shadow-accent);
-    }
-    .btn-primary:hover { box-shadow: 0 6px 24px rgba(59,130,246,0.45); }
-    .btn-secondary {
-      background: var(--surface-2); color: var(--text-primary);
-      border: 1.5px solid var(--border);
-    }
-    .btn-danger {
-      background: #fef2f2; color: var(--danger);
-      border: 1.5px solid #fecaca;
-    }
+    .btn svg { width: 15px; height: 15px; flex-shrink: 0; }
+    .btn-primary { background: linear-gradient(135deg, var(--blue-400), var(--blue-300)); color: white; box-shadow: var(--shadow-accent); }
+    .btn-secondary { background: var(--surface-2); color: var(--text-primary); border: 1.5px solid var(--border); }
+    .btn-danger { background: #fef2f2; color: var(--danger); border: 1.5px solid #fecaca; }
     .btn-row { display: flex; gap: 10px; }
     .btn-row .btn { flex: 1; }
 
     /* ── DIVIDER ── */
-    .divider { height: 1px; background: var(--border); margin: 20px 0; }
+    .divider { height: 1px; background: var(--border); margin: 18px 0; }
 
-    /* ── INTERVIEW LIST INSIDE DETAIL ── */
+    /* ── INTERVIEW ITEMS ── */
     .interview-item {
-      background: var(--surface-2);
-      border-radius: var(--radius-md);
-      padding: 14px 16px;
-      margin-bottom: 10px;
-      border: 1px solid var(--border);
-      position: relative;
+      background: var(--surface-2); border-radius: var(--radius-md);
+      padding: 12px 14px; margin-bottom: 10px; border: 1px solid var(--border);
     }
-    .interview-date-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
-    .interview-date { font-size: 14px; font-weight: 700; color: var(--text-primary); display: flex; align-items: center; gap: 6px; }
-    .interview-date svg { width: 14px; height: 14px; stroke: var(--blue-400); stroke-width: 2; fill: none; }
-    .interview-person { font-size: 12px; font-weight: 600; color: var(--text-secondary); display: flex; align-items: center; gap: 5px; }
-    .interview-person svg { width: 12px; height: 12px; stroke: var(--text-muted); stroke-width: 2; fill: none; }
-    .interview-actions { display: flex; gap: 6px; margin-top: 10px; }
+    .interview-date-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 5px; }
+    .interview-date { font-size: 13px; font-weight: 700; color: var(--text-primary); display: flex; align-items: center; gap: 5px; }
+    .interview-person { font-size: 12px; font-weight: 600; color: var(--text-secondary); display: flex; align-items: center; gap: 4px; }
+    .interview-person svg { width: 11px; height: 11px; stroke: var(--text-muted); stroke-width: 2; fill: none; }
+    .interview-actions { display: flex; gap: 6px; margin-top: 8px; }
     .interview-btn {
-      padding: 6px 12px; border-radius: 8px;
+      padding: 5px 11px; border-radius: 8px;
       font-family: var(--font); font-size: 11px; font-weight: 700;
-      cursor: pointer; border: none; transition: opacity 0.15s;
+      cursor: pointer; border: none;
     }
     .interview-btn-edit { background: var(--blue-50); color: var(--blue-400); }
     .interview-btn-delete { background: #fef2f2; color: var(--danger); }
 
     .add-interview-btn {
-      display: flex; align-items: center; justify-content: center; gap: 8px;
-      padding: 12px; border-radius: var(--radius-md);
+      display: flex; align-items: center; justify-content: center; gap: 7px;
+      padding: 11px; border-radius: var(--radius-md);
       border: 1.5px dashed var(--blue-200);
       background: var(--blue-50); color: var(--blue-400);
       font-family: var(--font); font-size: 13px; font-weight: 700;
-      cursor: pointer; width: 100%; transition: background 0.15s;
+      cursor: pointer; width: 100%;
     }
-    .add-interview-btn:hover { background: var(--blue-100); }
-    .add-interview-btn svg { width: 16px; height: 16px; stroke: currentColor; stroke-width: 2; fill: none; }
+    .add-interview-btn svg { width: 15px; height: 15px; stroke: currentColor; stroke-width: 2; fill: none; }
 
-    /* ── ORDER STEP BADGE ── */
     .step-num {
-      width: 22px; height: 22px; border-radius: 50%;
+      width: 20px; height: 20px; border-radius: 50%;
       background: linear-gradient(135deg, var(--blue-400), var(--blue-300));
-      color: white; font-size: 11px; font-weight: 700;
+      color: white; font-size: 10px; font-weight: 700;
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+
+    /* ── SEARCH LINKS ── */
+    .search-links { display: flex; gap: 7px; margin-bottom: 14px; flex-wrap: wrap; }
+    .search-link {
+      padding: 5px 11px; border-radius: 20px;
+      background: var(--surface-2); border: 1.5px solid var(--border);
+      font-size: 11px; font-weight: 700; color: var(--text-secondary);
+      cursor: pointer; display: flex; align-items: center; gap: 4px;
+      text-decoration: none; transition: background 0.15s, border-color 0.15s;
+    }
+    .search-link:hover { background: var(--blue-50); border-color: var(--blue-200); color: var(--blue-500); }
+    .search-link svg { width: 11px; height: 11px; flex-shrink: 0; }
+
+    /* ── DETAIL ── */
+    .detail-company-row { display: flex; align-items: center; gap: 14px; margin-bottom: 10px; }
+    .detail-logo {
+      width: 56px; height: 56px; border-radius: var(--radius-md);
+      background: linear-gradient(135deg, var(--blue-100), var(--blue-50));
+      border: 1px solid var(--border);
       display: flex; align-items: center; justify-content: center;
-      flex-shrink: 0;
+      font-size: 22px; font-weight: 700; color: var(--blue-500);
+      overflow: hidden; flex-shrink: 0;
+    }
+    .detail-logo img { width: 100%; height: 100%; object-fit: contain; }
+    .detail-name { font-size: 20px; font-weight: 700; color: var(--text-primary); }
+    .detail-sub { font-size: 12px; color: var(--text-secondary); font-weight: 500; margin-top: 2px; }
+
+    .info-box {
+      background: linear-gradient(135deg, var(--blue-50), #f0f7ff);
+      border: 1px solid var(--blue-100); border-radius: var(--radius-md);
+      padding: 12px 14px; margin-bottom: 14px;
+      font-size: 13px; color: var(--blue-600); font-weight: 500; line-height: 1.5;
+    }
+    .counter-badge {
+      display: inline-flex; align-items: center; justify-content: center;
+      background: var(--blue-400); color: white;
+      width: 18px; height: 18px; border-radius: 50%;
+      font-size: 10px; font-weight: 700; margin-left: 6px;
     }
 
     /* ── TOAST ── */
     .toast {
-      position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%) translateY(20px);
+      position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%) translateY(20px);
       background: var(--blue-900); color: white;
-      padding: 12px 20px; border-radius: 40px;
-      font-size: 13px; font-weight: 600;
-      box-shadow: var(--shadow-lg);
+      padding: 10px 18px; border-radius: 40px;
+      font-size: 13px; font-weight: 600; box-shadow: var(--shadow-lg);
       z-index: 500; opacity: 0; transition: opacity 0.2s, transform 0.2s;
-      white-space: nowrap;
-      display: flex; align-items: center; gap: 8px;
+      white-space: nowrap; display: flex; align-items: center; gap: 7px;
     }
     .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-    .toast svg { width: 15px; height: 15px; flex-shrink: 0; }
 
     /* ── LOADING ── */
-    .loading {
-      display: flex; align-items: center; justify-content: center;
-      padding: 40px; gap: 12px; color: var(--text-muted); font-size: 14px; font-weight: 600;
-    }
-    .spinner {
-      width: 20px; height: 20px;
-      border: 2px solid var(--border);
-      border-top-color: var(--blue-400);
-      border-radius: 50%;
-      animation: spin 0.8s linear infinite;
-    }
+    .loading { display: flex; align-items: center; justify-content: center; padding: 40px; gap: 10px; color: var(--text-muted); font-size: 13px; font-weight: 600; }
+    .spinner { width: 18px; height: 18px; border: 2px solid var(--border); border-top-color: var(--blue-400); border-radius: 50%; animation: spin 0.8s linear infinite; }
     @keyframes spin { to { transform: rotate(360deg); } }
-
-    /* ── COMPANY SEARCH LINK PILLS ── */
-    .search-links { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
-    .search-link {
-      padding: 6px 12px;
-      border-radius: 20px;
-      background: var(--surface-2);
-      border: 1.5px solid var(--border);
-      font-size: 11px; font-weight: 700;
-      color: var(--text-secondary);
-      cursor: pointer;
-      display: flex; align-items: center; gap: 5px;
-      text-decoration: none;
-      transition: background 0.15s, border-color 0.15s;
-    }
-    .search-link:hover { background: var(--blue-50); border-color: var(--blue-200); color: var(--blue-500); }
-    .search-link svg { width: 12px; height: 12px; flex-shrink: 0; }
-
-    /* ── DETAIL ── */
-    .detail-company-row {
-      display: flex; align-items: center; gap: 16px;
-      margin-bottom: 12px;
-    }
-    .detail-logo {
-      width: 64px; height: 64px;
-      border-radius: var(--radius-md);
-      background: linear-gradient(135deg, var(--blue-100), var(--blue-50));
-      border: 1px solid var(--border);
-      display: flex; align-items: center; justify-content: center;
-      font-size: 26px; font-weight: 700; color: var(--blue-500);
-      overflow: hidden; flex-shrink: 0;
-    }
-    .detail-logo img { width: 100%; height: 100%; object-fit: contain; }
-    .detail-name { font-size: 22px; font-weight: 700; color: var(--text-primary); }
-    .detail-sub { font-size: 13px; color: var(--text-secondary); font-weight: 500; margin-top: 2px; }
-
-    .info-box {
-      background: linear-gradient(135deg, var(--blue-50), #f0f7ff);
-      border: 1px solid var(--blue-100);
-      border-radius: var(--radius-md);
-      padding: 14px 16px;
-      margin-bottom: 14px;
-      font-size: 13px; color: var(--blue-600); font-weight: 500; line-height: 1.5;
-    }
-
-    /* ── COUNTER BADGE ── */
-    .counter-badge {
-      display: inline-flex; align-items: center; justify-content: center;
-      background: var(--blue-400); color: white;
-      width: 20px; height: 20px;
-      border-radius: 50%;
-      font-size: 11px; font-weight: 700;
-      margin-left: 8px;
-    }
   </style>
 </head>
 <body>
@@ -495,11 +409,16 @@ const analytics = getAnalytics(app);
 <!-- HEADER -->
 <header class="header">
   <div class="header-inner">
-    <div class="logo-row">
-      <div class="logo-icon">
-        <svg viewBox="0 0 24 24"><path d="M20 7H4C2.9 7 2 7.9 2 9v10c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V9c0-1.1-.9-2-2-2zM12 2C9.24 2 7 4.24 7 7h2c0-1.66 1.34-3 3-3s3 1.34 3 3h2c0-2.76-2.24-5-5-5z"/></svg>
+    <div class="header-top">
+      <div class="logo-row">
+        <div class="logo-icon">
+          <svg viewBox="0 0 24 24"><path d="M20 7H4C2.9 7 2 7.9 2 9v10c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V9c0-1.1-.9-2-2-2zM12 2C9.24 2 7 4.24 7 7h2c0-1.66 1.34-3 3-3s3 1.34 3 3h2c0-2.76-2.24-5-5-5z"/></svg>
+        </div>
+        <div class="logo-text">Postul<span class="logo-on">'ON</span></div>
       </div>
-      <div class="logo-text">Postul<span class="logo-on">'ON</span></div>
+      <button class="logout-btn" onclick="logout()" title="Changer de code / Déconnexion">
+        <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      </button>
     </div>
     <div class="header-title">Candidatures en cours</div>
     <div class="header-count" id="totalCount">—</div>
@@ -517,17 +436,14 @@ const analytics = getAnalytics(app);
 </main>
 
 <!-- FAB -->
-<button class="fab" onclick="goAddProcess()" title="Ajouter un processus">
+<button class="fab" id="fabBtn" title="Ajouter un processus">
   <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
 </button>
 
 <!-- TOAST -->
-<div class="toast" id="toast">
-  <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>
-  <span id="toastMsg"></span>
-</div>
+<div class="toast" id="toast"><span id="toastMsg"></span></div>
 
-<!-- ═══════════════════════════════════════════════ OVERLAY: PROCESS DETAIL -->
+<!-- ═══ OVERLAY: PROCESS DETAIL ═══ -->
 <div class="overlay" id="processDetailOverlay">
   <div class="sheet">
     <div class="sheet-handle"></div>
@@ -543,19 +459,17 @@ const analytics = getAnalytics(app);
         <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
       </button>
     </div>
-    <div class="sheet-body" id="processDetailBody">
-      <!-- filled dynamically -->
-    </div>
+    <div class="sheet-body" id="processDetailBody"></div>
   </div>
 </div>
 
-<!-- ═══════════════════════════════════════════════ OVERLAY: INTERVIEW FORM -->
+<!-- ═══ OVERLAY: INTERVIEW FORM ═══ -->
 <div class="overlay" id="interviewFormOverlay">
   <div class="sheet">
     <div class="sheet-handle"></div>
     <div class="sheet-header">
       <div class="sheet-icon">
-        <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
       </div>
       <div>
         <div class="sheet-title" id="interviewFormTitle">Nouvel entretien</div>
@@ -568,13 +482,12 @@ const analytics = getAnalytics(app);
     <div class="sheet-body">
       <input type="hidden" id="editInterviewId" />
       <input type="hidden" id="interviewProcessId" />
-
       <div class="form-group">
         <label class="form-label">Date *</label>
         <input class="form-input" type="date" id="interviewDate" />
       </div>
       <div class="form-group">
-        <label class="form-label">Heure *</label>
+        <label class="form-label">Heure</label>
         <input class="form-input" type="time" id="interviewTime" />
       </div>
       <div class="form-group">
@@ -607,117 +520,87 @@ const analytics = getAnalytics(app);
 </div>
 
 <script>
-/* ════════════════════════════════════════════════════════════
-   STATE
-══════════════════════════════════════════════════════════════ */
+/* ════ GUARD : code requis ════ */
+const userCode = localStorage.getItem('postul_on_code');
+if (!userCode) { window.location.replace('login.html'); }
+
+/* ════ STATE ════ */
 let processes = [];
 let interviews = [];
 let currentDetailId = null;
 
-/* ════════════════════════════════════════════════════════════
- /* ══════════════════════════════════════════════════════════════
-   FIREBASE INIT WITH SECRET CODE
-   ══════════════════════════════════════════════════════════════ */
+/* ════ HELPERS FIRESTORE ════ */
+function getCol(name) {
+  return window._collection(window._db, 'data', userCode, name);
+}
+function getDocRef(colName, id) {
+  return window._doc(window._db, 'data', userCode, colName, id);
+}
 
+/* ════ FIREBASE INIT ════ */
 function waitFirebase(cb) {
-  if (window.firebaseReady) { cb(); }
-  else { document.addEventListener('firebaseReady', cb, { once: true }); }
+  if (window.firebaseReady) cb();
+  else document.addEventListener('firebaseReady', cb, { once: true });
 }
 
 waitFirebase(() => {
-  // --- SYSTÈME DE CODE SECRET ---
-  let monCodeSecret = localStorage.getItem('mon_projet_secret_key');
-
-  if (!monCodeSecret) {
-    monCodeSecret = prompt("🔑 Entrez votre code d'accès personnel :");
-    if (monCodeSecret) {
-      localStorage.setItem('mon_projet_secret_key', monCodeSecret);
-    }
-  }
-
-  if (monCodeSecret) {
-    // On passe le code secret aux fonctions de lecture
-    listenProcesses(monCodeSecret);
-    listenInterviews(monCodeSecret);
-  } else {
-    console.error("Accès refusé : Aucun code fourni.");
-  }
+  listenProcesses();
+  listenInterviews();
 });
 
-function listenProcesses(code) {
-  // On crée un chemin dynamique : /CODE/processes
-  const col = window._col(code + '/processes');
-  window._onSnapshot(col, snap => {
+function listenProcesses() {
+  window._onSnapshot(getCol('processes'), snap => {
     processes = snap.docs.map(d => ({ id: d.id, ...d.data() }));
     renderList();
   });
 }
-
-function listenInterviews(code) {
-  // On crée un chemin dynamique : /CODE/interviews
-  const col = window._col(code + '/interviews');
-  window._onSnapshot(col, snap => {
+function listenInterviews() {
+  window._onSnapshot(getCol('interviews'), snap => {
     interviews = snap.docs.map(d => ({ id: d.id, ...d.data() }));
     renderList();
     if (currentDetailId) renderDetail(currentDetailId);
   });
 }
 
-    // ─── FIREBASE CONFIG — Remplacez par votre propre config ───────────────────
-// Import the functions you need from the SDKs you need
-import { initializeApp } from "firebase/app";
-import { getAnalytics } from "firebase/analytics";
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
+/* ════ FAB ════ */
+document.getElementById('fabBtn').addEventListener('click', () => {
+  window.location.href = 'process-form.html';
+});
 
-// Your web app's Firebase configuration
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
-const firebaseConfig = {
-  apiKey: "AIzaSyCiVz4-sUKNDydb8o7_uqewUCBhQeNjNKw",
-  authDomain: "postul-on.firebaseapp.com",
-  databaseURL: "https://postul-on-default-rtdb.europe-west1.firebasedatabase.app/",
-  projectId: "postul-on",
-  storageBucket: "postul-on.firebasestorage.app",
-  messagingSenderId: "227373874590",
-  appId: "1:227373874590:web:10f68b90ec723564eb2a8f",
-  measurementId: "G-M74PJNVFGW"
-};
+/* ════ LOGOUT ════ */
+function logout() {
+  if (!confirm('Changer de code d\'accès ? Vos données restent en ligne.')) return;
+  localStorage.removeItem('postul_on_code');
+  window.location.replace('login.html');
+}
 
-/* ════════════════════════════════════════════════════════════
-   HELPERS
-══════════════════════════════════════════════════════════════ */
+/* ════ HELPERS ════ */
 function nextInterview(processId) {
   const now = new Date();
   return interviews
     .filter(i => i.processId === processId && new Date(i.date + 'T' + (i.time || '00:00')) >= now)
-    .sort((a, b) => new Date(a.date + 'T' + (a.time || '00:00')) - new Date(b.date + 'T' + (b.time || '00:00')))[0];
+    .sort((a,b) => new Date(a.date+'T'+(a.time||'00:00')) - new Date(b.date+'T'+(b.time||'00:00')))[0];
 }
-
 function allInterviews(processId) {
   return interviews
     .filter(i => i.processId === processId)
-    .sort((a, b) => new Date(a.date + 'T' + (a.time || '00:00')) - new Date(b.date + 'T' + (b.time || '00:00')));
+    .sort((a,b) => new Date(a.date+'T'+(a.time||'00:00')) - new Date(b.date+'T'+(b.time||'00:00')));
 }
-
-function upcomingInterviewsCount(processId) {
+function upcomingCount(processId) {
   const now = new Date();
-  return interviews.filter(i => i.processId === processId && new Date(i.date + 'T' + (i.time || '00:00')) >= now).length;
+  return interviews.filter(i => i.processId === processId && new Date(i.date+'T'+(i.time||'00:00')) >= now).length;
 }
-
 function formatDate(dateStr, timeStr) {
   if (!dateStr) return 'Date inconnue';
   const d = new Date(dateStr + 'T' + (timeStr || '00:00'));
   return d.toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric', month: 'short' })
     + (timeStr ? ' · ' + d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }) : '');
 }
-
 function daysUntil(dateStr) {
   const now = new Date(); now.setHours(0,0,0,0);
-  const d = new Date(dateStr);
-  d.setHours(0,0,0,0);
+  const d = new Date(dateStr); d.setHours(0,0,0,0);
   return Math.round((d - now) / 86400000);
 }
-
 function badgeForDays(days) {
   if (days === 0) return { cls: 'badge-today', label: "Aujourd'hui" };
   if (days === 1) return { cls: 'badge-soon', label: 'Demain' };
@@ -725,82 +608,66 @@ function badgeForDays(days) {
   if (days <= 7) return { cls: 'badge-soon', label: `Dans ${days}j` };
   return { cls: 'badge-active', label: `Dans ${days}j` };
 }
-
 function initials(name) {
   if (!name) return '?';
   return name.split(' ').map(w => w[0]).join('').slice(0,2).toUpperCase();
 }
-
 function logoHtml(logoUrl, name) {
-  if (logoUrl) {
-    return `<img src="${escHtml(logoUrl)}" alt="${escHtml(name)}" onerror="this.parentNode.innerHTML='${initials(name)}'"/>`;
-  }
+  if (logoUrl)
+    return `<img src="${esc(logoUrl)}" alt="${esc(name)}" onerror="this.parentNode.innerHTML='${initials(name)}'"/>`;
   return initials(name);
 }
-
-function escHtml(s) {
-  return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+function esc(s) {
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
-/* ════════════════════════════════════════════════════════════
-   RENDER LIST
-══════════════════════════════════════════════════════════════ */
-function getProcessGroup(p) {
+/* ════ RENDER LIST ════ */
+function getGroup(p) {
   const ni = nextInterview(p.id);
   const total = allInterviews(p.id).length;
-  if (ni) return 1;       // a venir
-  if (total === 0) return 2; // aucun entretien
-  return 3;               // tous terminés
+  if (ni) return 1;
+  if (total === 0) return 2;
+  return 3;
 }
 
 function renderList() {
   const list = document.getElementById('processList');
 
-  // Tri : à venir (par date ASC), puis sans entretien, puis tous terminés
-  const sorted = [...processes].sort((a, b) => {
-    const ga = getProcessGroup(a);
-    const gb = getProcessGroup(b);
+  const sorted = [...processes].sort((a,b) => {
+    const ga = getGroup(a), gb = getGroup(b);
     if (ga !== gb) return ga - gb;
     if (ga === 1) {
-      const ni_a = nextInterview(a.id);
-      const ni_b = nextInterview(b.id);
-      return new Date(ni_a.date + 'T' + (ni_a.time || '00:00')) - new Date(ni_b.date + 'T' + (ni_b.time || '00:00'));
+      const na = nextInterview(a.id), nb = nextInterview(b.id);
+      return new Date(na.date+'T'+(na.time||'00:00')) - new Date(nb.date+'T'+(nb.time||'00:00'));
     }
     return 0;
   });
 
-  // Stats
   const withUpcoming = processes.filter(p => nextInterview(p.id)).length;
-  const totalUpcomingInterviews = interviews.filter(i => new Date(i.date + 'T' + (i.time || '00:00')) >= new Date()).length;
+  const totalUpcoming = interviews.filter(i => new Date(i.date+'T'+(i.time||'00:00')) >= new Date()).length;
 
   document.getElementById('totalCount').textContent = processes.length;
-  document.getElementById('headerSub').textContent =
-    processes.length <= 1 ? 'processus de recrutement' : 'processus de recrutement';
-
-  const statsRow = document.getElementById('statsRow');
-  statsRow.innerHTML = `
+  document.getElementById('headerSub').textContent = 'processus de recrutement';
+  document.getElementById('statsRow').innerHTML = `
     <div class="stat-pill"><div class="dot dot-blue"></div>${processes.length} processus</div>
-    <div class="stat-pill"><div class="dot dot-green"></div>${withUpcoming} actif${withUpcoming > 1 ? 's' : ''}</div>
-    <div class="stat-pill"><div class="dot dot-yellow"></div>${totalUpcomingInterviews} entretien${totalUpcomingInterviews > 1 ? 's' : ''} à venir</div>
+    <div class="stat-pill"><div class="dot dot-green"></div>${withUpcoming} actif${withUpcoming>1?'s':''}</div>
+    <div class="stat-pill"><div class="dot dot-yellow"></div>${totalUpcoming} entretien${totalUpcoming>1?'s':''} à venir</div>
   `;
 
   if (processes.length === 0) {
-    list.innerHTML = `
-      <div class="empty-state">
-        <div class="empty-icon">
-          <svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/><line x1="12" y1="12" x2="12" y2="16"/><line x1="10" y1="14" x2="14" y2="14"/></svg>
-        </div>
-        <div class="empty-title">Aucune candidature</div>
-        <div class="empty-sub">Appuyez sur <strong>+</strong> pour ajouter votre première entreprise.</div>
-      </div>`;
+    list.innerHTML = `<div class="empty-state">
+      <div class="empty-icon"><svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/><line x1="12" y1="12" x2="12" y2="16"/><line x1="10" y1="14" x2="14" y2="14"/></svg></div>
+      <div class="empty-title">Aucune candidature</div>
+      <div class="empty-sub">Appuyez sur <strong>+</strong> pour ajouter votre première entreprise.</div>
+    </div>`;
     return;
   }
 
   list.innerHTML = sorted.map(p => {
     const ni = nextInterview(p.id);
     const countAll = allInterviews(p.id).length;
-    const countUpcoming = upcomingInterviewsCount(p.id);
-    let badge = { cls: 'badge-none', label: 'Pas d\'entretien' };
+    const countUp = upcomingCount(p.id);
+    let badge = { cls: 'badge-none', label: "Pas d'entretien" };
     let accentCls = 'accent-none';
     let metaStr = '';
 
@@ -812,30 +679,26 @@ function renderList() {
     } else if (countAll > 0) {
       badge = { cls: 'badge-done', label: 'Terminé' };
       accentCls = 'accent-done';
-      metaStr = `${countAll} entretien${countAll > 1 ? 's' : ''} passé${countAll > 1 ? 's' : ''}`;
+      metaStr = `${countAll} entretien${countAll>1?'s':''} passé${countAll>1?'s':''}`;
     }
 
-    return `
-      <div class="process-card" onclick="openDetail('${p.id}')">
-        <div class="left-accent ${accentCls}"></div>
-        <div class="company-logo" style="margin-left:4px">${logoHtml(p.logoUrl, p.companyName)}</div>
-        <div class="card-info">
-          <div class="card-company">${escHtml(p.companyName)}</div>
-          ${ni ? `<div class="card-next">
-            <svg viewBox="0 0 24 24" fill="none" stroke="var(--blue-400)" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-            <span style="color:var(--text-secondary);font-weight:600;font-size:12px">${escHtml(metaStr)}</span>
-          </div>` : `<div class="card-meta">${escHtml(metaStr) || 'Aucun entretien planifié'}</div>`}
-          ${countUpcoming > 0 ? `<div style="font-size:11px;color:var(--text-muted);font-weight:600;margin-top:3px">${countUpcoming} entretien${countUpcoming > 1 ? 's' : ''} à venir</div>` : ''}
-        </div>
-        <div class="card-badge ${badge.cls}">${badge.label}</div>
+    return `<div class="process-card" onclick="openDetail('${p.id}')">
+      <div class="left-accent ${accentCls}"></div>
+      <div class="company-logo" style="margin-left:4px">${logoHtml(p.logoUrl, p.companyName)}</div>
+      <div class="card-info">
+        <div class="card-company">${esc(p.companyName)}</div>
+        ${ni
+          ? `<div class="card-next"><svg viewBox="0 0 24 24" fill="none" stroke="var(--blue-400)" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg><span style="color:var(--text-secondary);font-weight:600;font-size:12px">${esc(metaStr)}</span></div>`
+          : `<div class="card-meta">${esc(metaStr)||'Aucun entretien planifié'}</div>`
+        }
+        ${countUp>0 ? `<div style="font-size:11px;color:var(--text-muted);font-weight:600;margin-top:2px">${countUp} entretien${countUp>1?'s':''} à venir</div>` : ''}
       </div>
-    `;
+      <div class="card-badge ${badge.cls}">${badge.label}</div>
+    </div>`;
   }).join('');
 }
 
-/* ════════════════════════════════════════════════════════════
-   DETAIL SHEET
-══════════════════════════════════════════════════════════════ */
+/* ════ DETAIL ════ */
 function openDetail(id) {
   currentDetailId = id;
   renderDetail(id);
@@ -848,61 +711,51 @@ function renderDetail(id) {
   const ivs = allInterviews(id);
   const body = document.getElementById('processDetailBody');
 
-  const googleUrl = `https://www.google.com/search?q=${encodeURIComponent((p.companyName || '') + ' recrutement emploi')}`;
-  const linkedinUrl = `https://www.linkedin.com/company/${encodeURIComponent((p.companyName || '').toLowerCase().replace(/\s+/g,'-'))}`;
+  const googleUrl  = `https://www.google.com/search?q=${encodeURIComponent((p.companyName||'')+' recrutement emploi')}`;
+  const linkedinUrl = `https://www.linkedin.com/company/${encodeURIComponent((p.companyName||'').toLowerCase().replace(/\s+/g,'-'))}`;
 
-  const ivHtml = ivs.length === 0 ? `
-    <div style="text-align:center;padding:20px 0;color:var(--text-muted);font-size:13px;font-weight:600;">
-      Aucun entretien planifié
-    </div>
-  ` : ivs.map((iv, idx) => {
-    const days = daysUntil(iv.date);
-    const badge = badgeForDays(days);
-    return `
-      <div class="interview-item">
-        <div class="interview-date-row">
-          <div class="interview-date">
-            <div class="step-num">${idx + 1}</div>
-            ${iv.type ? `<span style="font-size:12px;color:var(--text-secondary);font-weight:600;">${escHtml(iv.type)}</span> · ` : ''}
-            ${formatDate(iv.date, iv.time)}
+  const ivHtml = ivs.length === 0
+    ? `<div style="text-align:center;padding:18px 0;color:var(--text-muted);font-size:13px;font-weight:600;">Aucun entretien planifié</div>`
+    : ivs.map((iv, idx) => {
+        const days = daysUntil(iv.date);
+        const badge = badgeForDays(days);
+        return `<div class="interview-item">
+          <div class="interview-date-row">
+            <div class="interview-date">
+              <div class="step-num">${idx+1}</div>
+              ${iv.type ? `<span style="font-size:11px;color:var(--text-secondary);font-weight:600;">${esc(iv.type)}</span> · ` : ''}
+              ${formatDate(iv.date, iv.time)}
+            </div>
+            <span class="card-badge ${badge.cls}" style="font-size:10px">${badge.label}</span>
           </div>
-          <span class="card-badge ${badge.cls}" style="font-size:10px">${badge.label}</span>
-        </div>
-        ${iv.person ? `<div class="interview-person">
-          <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-          ${escHtml(iv.person)}
-        </div>` : ''}
-        ${iv.notes ? `<div style="font-size:12px;color:var(--text-secondary);margin-top:6px;line-height:1.5;">${escHtml(iv.notes)}</div>` : ''}
-        <div class="interview-actions">
-          <button class="interview-btn interview-btn-edit" onclick="openEditInterview('${iv.id}')">Modifier</button>
-          <button class="interview-btn interview-btn-delete" onclick="deleteInterview('${iv.id}')">Supprimer</button>
-        </div>
-      </div>
-    `;
-  }).join('');
+          ${iv.person ? `<div class="interview-person"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>${esc(iv.person)}</div>` : ''}
+          ${iv.notes ? `<div style="font-size:12px;color:var(--text-secondary);margin-top:5px;line-height:1.5;">${esc(iv.notes)}</div>` : ''}
+          <div class="interview-actions">
+            <button class="interview-btn interview-btn-edit" onclick="openEditInterview('${iv.id}')">Modifier</button>
+            <button class="interview-btn interview-btn-delete" onclick="deleteInterview('${iv.id}')">Supprimer</button>
+          </div>
+        </div>`;
+      }).join('');
 
   body.innerHTML = `
     <div class="detail-company-row">
       <div class="detail-logo">${logoHtml(p.logoUrl, p.companyName)}</div>
       <div>
-        <div class="detail-name">${escHtml(p.companyName)}</div>
-        <div class="detail-sub">${ivs.length} entretien${ivs.length > 1 ? 's' : ''} enregistré${ivs.length > 1 ? 's' : ''}</div>
+        <div class="detail-name">${esc(p.companyName)}</div>
+        <div class="detail-sub">${ivs.length} entretien${ivs.length>1?'s':''} enregistré${ivs.length>1?'s':''}</div>
       </div>
     </div>
-    <div class="search-links" style="margin-bottom:16px;">
+    <div class="search-links">
       <a class="search-link" href="${googleUrl}" target="_blank" rel="noopener">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
-        Google
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>Google
       </a>
       <a class="search-link" href="${linkedinUrl}" target="_blank" rel="noopener">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 8a6 6 0 016 6v7h-4v-7a2 2 0 00-2-2 2 2 0 00-2 2v7h-4v-7a6 6 0 016-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
-        LinkedIn
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 8a6 6 0 016 6v7h-4v-7a2 2 0 00-2-2 2 2 0 00-2 2v7h-4v-7a6 6 0 016-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>LinkedIn
       </a>
     </div>
-    ${p.notes ? `<div class="info-box">${escHtml(p.notes)}</div>` : ''}
-    <div style="font-size:12px;font-weight:700;color:var(--text-secondary);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:12px;">
-      Entretiens
-      ${ivs.length > 0 ? `<span class="counter-badge">${ivs.length}</span>` : ''}
+    ${p.notes ? `<div class="info-box">${esc(p.notes)}</div>` : ''}
+    <div style="font-size:11px;font-weight:700;color:var(--text-secondary);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px;">
+      Entretiens${ivs.length>0?`<span class="counter-badge">${ivs.length}</span>`:''}
     </div>
     ${ivHtml}
     <button class="add-interview-btn" onclick="openAddInterview('${id}')">
@@ -912,45 +765,33 @@ function renderDetail(id) {
     <div class="divider"></div>
     <div class="btn-row">
       <button class="btn btn-secondary" onclick="goEditProcess('${id}')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:15px;height:15px"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
         Modifier
       </button>
       <button class="btn btn-danger" onclick="deleteProcess('${id}')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:15px;height:15px"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
         Supprimer
       </button>
     </div>
   `;
 }
 
-/* ════════════════════════════════════════════════════════════
-   NAVIGATION VERS LE FORMULAIRE PROCESSUS
-══════════════════════════════════════════════════════════════ */
-function goAddProcess() {
-  window.location.href = 'process-form.html';
-}
-
+/* ════ NAVIGATION ════ */
 function goEditProcess(id) {
   window.location.href = 'process-form.html?id=' + id;
 }
 
-/* ════════════════════════════════════════════════════════════
-   PROCESS DELETE
-══════════════════════════════════════════════════════════════ */
+/* ════ PROCESS DELETE ════ */
 async function deleteProcess(id) {
   if (!confirm('Supprimer ce processus et tous ses entretiens ?')) return;
   const ivs = interviews.filter(i => i.processId === id);
-  for (const iv of ivs) {
-    await window._deleteDoc(window._doc('interviews', iv.id));
-  }
-  await window._deleteDoc(window._doc('processes', id));
+  for (const iv of ivs) await window._deleteDoc(getDocRef('interviews', iv.id));
+  await window._deleteDoc(getDocRef('processes', id));
   closeOverlay('processDetailOverlay');
   showToast('Processus supprimé');
 }
 
-/* ════════════════════════════════════════════════════════════
-   INTERVIEW CRUD
-══════════════════════════════════════════════════════════════ */
+/* ════ INTERVIEW CRUD ════ */
 function openAddInterview(processId) {
   document.getElementById('interviewFormTitle').textContent = 'Nouvel entretien';
   document.getElementById('editInterviewId').value = '';
@@ -991,59 +832,50 @@ async function saveInterview() {
   };
   try {
     if (id) {
-      await window._updateDoc(window._doc('interviews', id), data);
+      await window._updateDoc(getDocRef('interviews', id), data);
       showToast('Entretien mis à jour ✓');
     } else {
       data.createdAt = window._Timestamp.now();
-      await window._addDoc(window._col('interviews'), data);
+      await window._addDoc(getCol('interviews'), data);
       showToast('Entretien ajouté ✓');
     }
-    // Retour à l'accueil : ferme tous les overlays
     closeOverlay('interviewFormOverlay');
     closeOverlay('processDetailOverlay');
   } catch(e) {
     console.error(e);
-    showToast('Erreur Firebase — vérifiez la config', true);
+    showToast('Erreur Firebase', true);
   }
 }
 
 async function deleteInterview(id) {
   if (!confirm('Supprimer cet entretien ?')) return;
-  await window._deleteDoc(window._doc('interviews', id));
+  await window._deleteDoc(getDocRef('interviews', id));
   showToast('Entretien supprimé');
 }
 
-/* ════════════════════════════════════════════════════════════
-   OVERLAYS
-══════════════════════════════════════════════════════════════ */
+/* ════ OVERLAYS ════ */
 function openOverlay(id) {
   document.getElementById(id).classList.add('open');
   document.body.style.overflow = 'hidden';
 }
 function closeOverlay(id) {
   document.getElementById(id).classList.remove('open');
-  const anyOpen = document.querySelector('.overlay.open');
-  if (!anyOpen) document.body.style.overflow = '';
+  if (!document.querySelector('.overlay.open')) document.body.style.overflow = '';
   if (id === 'processDetailOverlay') currentDetailId = null;
 }
-
 document.querySelectorAll('.overlay').forEach(el => {
-  el.addEventListener('click', e => {
-    if (e.target === el) closeOverlay(el.id);
-  });
+  el.addEventListener('click', e => { if (e.target === el) closeOverlay(el.id); });
 });
 
-/* ════════════════════════════════════════════════════════════
-   TOAST
-══════════════════════════════════════════════════════════════ */
+/* ════ TOAST ════ */
 let toastTimer;
 function showToast(msg, isError = false) {
-  const toast = document.getElementById('toast');
+  const t = document.getElementById('toast');
   document.getElementById('toastMsg').textContent = msg;
-  toast.style.background = isError ? 'var(--danger)' : 'var(--blue-900)';
-  toast.classList.add('show');
+  t.style.background = isError ? 'var(--danger)' : 'var(--blue-900)';
+  t.classList.add('show');
   clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => toast.classList.remove('show'), 2800);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2800);
 }
 </script>
 </body>
