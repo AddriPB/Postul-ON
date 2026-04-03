@@ -1,0 +1,1015 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Postul'ON — Suivi Recrutement</title>
+  <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+
+  <!-- Firebase SDK -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import {
+      getFirestore, collection, addDoc, getDocs, doc,
+      updateDoc, deleteDoc, query, orderBy, onSnapshot, Timestamp
+    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+    // ─── FIREBASE CONFIG — Remplacez par votre propre config ───────────────────
+    const firebaseConfig = {
+      apiKey: "YOUR_API_KEY",
+      authDomain: "YOUR_PROJECT.firebaseapp.com",
+      projectId: "YOUR_PROJECT_ID",
+      storageBucket: "YOUR_PROJECT.appspot.com",
+      messagingSenderId: "YOUR_SENDER_ID",
+      appId: "YOUR_APP_ID"
+    };
+    // ───────────────────────────────────────────────────────────────────────────
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    window._db = db;
+    window._col = (name) => collection(db, name);
+    window._addDoc = addDoc;
+    window._getDocs = getDocs;
+    window._doc = (path, ...args) => doc(db, path, ...args);
+    window._updateDoc = updateDoc;
+    window._deleteDoc = deleteDoc;
+    window._query = query;
+    window._orderBy = orderBy;
+    window._onSnapshot = onSnapshot;
+    window._Timestamp = Timestamp;
+    window.firebaseReady = true;
+    document.dispatchEvent(new Event("firebaseReady"));
+  </script>
+
+  <style>
+    :root {
+      --blue-900: #0a1628;
+      --blue-800: #0d1f3c;
+      --blue-700: #102a50;
+      --blue-600: #1a3a6b;
+      --blue-500: #1e4d8c;
+      --blue-400: #2563c4;
+      --blue-300: #3b82f6;
+      --blue-200: #93c5fd;
+      --blue-100: #dbeafe;
+      --blue-50:  #eff6ff;
+
+      --accent: #3b82f6;
+      --accent-glow: rgba(59,130,246,0.35);
+      --gold: #f0c040;
+      --success: #22c55e;
+      --danger: #ef4444;
+      --warning: #f59e0b;
+
+      --bg: #f0f4f9;
+      --surface: #ffffff;
+      --surface-2: #f8faff;
+      --border: rgba(30,77,140,0.10);
+      --text-primary: #0a1628;
+      --text-secondary: #4b6b9a;
+      --text-muted: #94adc7;
+
+      --radius-sm: 10px;
+      --radius-md: 16px;
+      --radius-lg: 24px;
+      --radius-xl: 32px;
+
+      --shadow-sm: 0 2px 8px rgba(10,22,40,0.06);
+      --shadow-md: 0 4px 20px rgba(10,22,40,0.10);
+      --shadow-lg: 0 8px 32px rgba(10,22,40,0.14);
+      --shadow-accent: 0 4px 20px rgba(59,130,246,0.30);
+
+      --font: 'Quicksand', sans-serif;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--text-primary);
+      min-height: 100vh;
+      max-width: 430px;
+      margin: 0 auto;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--blue-200); border-radius: 4px; }
+
+    /* ── HEADER ── */
+    .header {
+      background: linear-gradient(145deg, var(--blue-900) 0%, var(--blue-700) 50%, var(--blue-500) 100%);
+      padding: 52px 24px 28px;
+      position: relative;
+      overflow: hidden;
+    }
+    .header::before {
+      content: '';
+      position: absolute;
+      top: -60px; right: -60px;
+      width: 200px; height: 200px;
+      background: radial-gradient(circle, rgba(59,130,246,0.25) 0%, transparent 70%);
+      border-radius: 50%;
+    }
+    .header::after {
+      content: '';
+      position: absolute;
+      bottom: -30px; left: -30px;
+      width: 140px; height: 140px;
+      background: radial-gradient(circle, rgba(59,130,246,0.15) 0%, transparent 70%);
+      border-radius: 50%;
+    }
+    .header-inner { position: relative; z-index: 1; }
+    .logo-row { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; }
+    .logo-icon {
+      width: 36px; height: 36px;
+      background: linear-gradient(135deg, var(--blue-300), var(--blue-400));
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: var(--shadow-accent);
+    }
+    .logo-icon svg { width: 20px; height: 20px; fill: white; }
+    .logo-text { font-size: 22px; font-weight: 700; color: white; letter-spacing: -0.5px; }
+    .logo-text .logo-on { color: var(--gold); }
+    .header-title { font-size: 13px; font-weight: 500; color: var(--blue-200); margin-bottom: 4px; letter-spacing: 0.5px; text-transform: uppercase; }
+    .header-count { font-size: 32px; font-weight: 700; color: white; line-height: 1; }
+    .header-sub { font-size: 13px; color: var(--blue-200); margin-top: 4px; font-weight: 500; }
+
+    .stats-row { display: flex; gap: 12px; margin-top: 20px; flex-wrap: wrap; }
+    .stat-pill {
+      background: rgba(255,255,255,0.10);
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 20px;
+      padding: 6px 14px;
+      display: flex; align-items: center; gap: 6px;
+      font-size: 12px; font-weight: 600; color: white;
+    }
+    .stat-pill .dot { width: 7px; height: 7px; border-radius: 50%; }
+    .dot-green { background: var(--success); box-shadow: 0 0 6px var(--success); }
+    .dot-yellow { background: var(--warning); }
+    .dot-blue { background: var(--blue-300); }
+
+    /* ── FAB ── */
+    .fab {
+      position: fixed;
+      bottom: 28px; right: 24px;
+      width: 58px; height: 58px;
+      background: linear-gradient(135deg, var(--blue-400), var(--blue-300));
+      border: none; border-radius: 50%;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: var(--shadow-accent), 0 4px 16px rgba(59,130,246,0.5);
+      z-index: 100;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .fab:active { transform: scale(0.93); }
+    .fab svg { width: 24px; height: 24px; stroke: white; stroke-width: 2.5; fill: none; }
+
+    /* ── CONTENT ── */
+    .content { padding: 0 16px 100px; }
+
+    /* ── SECTION TITLE ── */
+    .section-title {
+      font-size: 11px; font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      padding: 20px 8px 10px;
+    }
+
+    /* ── PROCESS CARD ── */
+    .process-card {
+      background: var(--surface);
+      border-radius: var(--radius-lg);
+      padding: 16px;
+      margin-bottom: 10px;
+      box-shadow: var(--shadow-sm);
+      border: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      cursor: pointer;
+      transition: transform 0.15s, box-shadow 0.15s;
+      position: relative;
+      overflow: hidden;
+    }
+    .process-card:active { transform: scale(0.985); }
+    .process-card:hover { box-shadow: var(--shadow-md); }
+    .process-card .left-accent {
+      position: absolute; left: 0; top: 0; bottom: 0;
+      width: 4px;
+      border-radius: 4px 0 0 4px;
+    }
+    .accent-active { background: var(--accent); }
+    .accent-pending { background: var(--warning); }
+    .accent-done { background: var(--success); }
+    .accent-none { background: var(--blue-200); }
+
+    .company-logo {
+      width: 48px; height: 48px;
+      border-radius: var(--radius-sm);
+      background: linear-gradient(135deg, var(--blue-100), var(--blue-50));
+      border: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px; font-weight: 700;
+      color: var(--blue-500);
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+    .company-logo img { width: 100%; height: 100%; object-fit: contain; }
+
+    .card-info { flex: 1; min-width: 0; }
+    .card-company { font-size: 15px; font-weight: 700; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .card-meta { font-size: 12px; color: var(--text-secondary); margin-top: 2px; font-weight: 500; }
+    .card-next { font-size: 11px; margin-top: 6px; display: flex; align-items: center; gap: 4px; }
+    .card-next svg { width: 12px; height: 12px; flex-shrink: 0; }
+
+    .card-badge {
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 11px; font-weight: 700;
+      white-space: nowrap;
+    }
+    .badge-active { background: var(--blue-50); color: var(--blue-400); border: 1px solid var(--blue-100); }
+    .badge-soon   { background: #fff7ed; color: #ea580c; border: 1px solid #fed7aa; }
+    .badge-today  { background: #fef2f2; color: var(--danger); border: 1px solid #fecaca; }
+    .badge-done   { background: #f0fdf4; color: #16a34a; border: 1px solid #bbf7d0; }
+    .badge-none   { background: var(--surface-2); color: var(--text-muted); border: 1px solid var(--border); }
+
+    /* ── EMPTY STATE ── */
+    .empty-state { text-align: center; padding: 48px 24px; }
+    .empty-icon {
+      width: 80px; height: 80px;
+      background: linear-gradient(135deg, var(--blue-100), var(--blue-50));
+      border-radius: 50%; margin: 0 auto 20px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .empty-icon svg { width: 36px; height: 36px; stroke: var(--blue-300); stroke-width: 1.5; fill: none; }
+    .empty-title { font-size: 18px; font-weight: 700; color: var(--text-primary); margin-bottom: 8px; }
+    .empty-sub { font-size: 14px; color: var(--text-secondary); font-weight: 500; line-height: 1.5; }
+
+    /* ── MODAL OVERLAY ── */
+    .overlay {
+      position: fixed; inset: 0;
+      background: rgba(10,22,40,0.55);
+      backdrop-filter: blur(4px);
+      z-index: 200;
+      display: none;
+      align-items: flex-end;
+      justify-content: center;
+    }
+    .overlay.open { display: flex; animation: overlayIn 0.2s ease; }
+    @keyframes overlayIn { from { opacity: 0; } to { opacity: 1; } }
+
+    .sheet {
+      background: var(--surface);
+      width: 100%; max-width: 430px;
+      border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+      max-height: 92vh;
+      overflow-y: auto;
+      animation: sheetIn 0.3s cubic-bezier(0.34,1.20,0.64,1);
+    }
+    @keyframes sheetIn {
+      from { transform: translateY(100%); }
+      to   { transform: translateY(0); }
+    }
+    .sheet-handle {
+      width: 40px; height: 4px;
+      background: var(--border);
+      border-radius: 2px;
+      margin: 14px auto 0;
+    }
+    .sheet-header {
+      padding: 20px 24px 16px;
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; gap: 12px;
+    }
+    .sheet-icon {
+      width: 40px; height: 40px;
+      background: linear-gradient(135deg, var(--blue-100), var(--blue-50));
+      border-radius: var(--radius-sm);
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .sheet-icon svg { width: 20px; height: 20px; stroke: var(--blue-400); stroke-width: 2; fill: none; }
+    .sheet-title { font-size: 18px; font-weight: 700; color: var(--text-primary); }
+    .sheet-subtitle { font-size: 12px; color: var(--text-secondary); font-weight: 500; }
+    .sheet-close {
+      margin-left: auto; background: none; border: none;
+      width: 32px; height: 32px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; background: var(--surface-2);
+    }
+    .sheet-close svg { width: 16px; height: 16px; stroke: var(--text-secondary); stroke-width: 2; fill: none; }
+    .sheet-body { padding: 20px 24px 32px; }
+
+    /* ── FORM ── */
+    .form-group { margin-bottom: 18px; }
+    .form-label {
+      display: block;
+      font-size: 12px; font-weight: 700;
+      color: var(--text-secondary);
+      text-transform: uppercase; letter-spacing: 0.5px;
+      margin-bottom: 8px;
+    }
+    .form-input, .form-select, .form-textarea {
+      width: 100%;
+      padding: 13px 16px;
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-md);
+      font-family: var(--font);
+      font-size: 14px; font-weight: 500;
+      color: var(--text-primary);
+      background: var(--surface-2);
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      -webkit-appearance: none;
+    }
+    .form-input:focus, .form-select:focus, .form-textarea:focus {
+      border-color: var(--blue-300);
+      box-shadow: 0 0 0 3px rgba(59,130,246,0.12);
+      background: var(--surface);
+    }
+    .form-textarea { resize: none; height: 80px; }
+    .form-select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%234b6b9a' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; padding-right: 36px; }
+
+    /* ── BUTTONS ── */
+    .btn {
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      padding: 14px 20px;
+      border: none; border-radius: var(--radius-md);
+      font-family: var(--font); font-size: 14px; font-weight: 700;
+      cursor: pointer; transition: transform 0.15s, box-shadow 0.15s, opacity 0.15s;
+      width: 100%;
+    }
+    .btn:active { transform: scale(0.97); }
+    .btn svg { width: 16px; height: 16px; flex-shrink: 0; }
+    .btn-primary {
+      background: linear-gradient(135deg, var(--blue-400), var(--blue-300));
+      color: white; box-shadow: var(--shadow-accent);
+    }
+    .btn-primary:hover { box-shadow: 0 6px 24px rgba(59,130,246,0.45); }
+    .btn-secondary {
+      background: var(--surface-2); color: var(--text-primary);
+      border: 1.5px solid var(--border);
+    }
+    .btn-danger {
+      background: #fef2f2; color: var(--danger);
+      border: 1.5px solid #fecaca;
+    }
+    .btn-row { display: flex; gap: 10px; }
+    .btn-row .btn { flex: 1; }
+
+    /* ── DIVIDER ── */
+    .divider { height: 1px; background: var(--border); margin: 20px 0; }
+
+    /* ── INTERVIEW LIST INSIDE DETAIL ── */
+    .interview-item {
+      background: var(--surface-2);
+      border-radius: var(--radius-md);
+      padding: 14px 16px;
+      margin-bottom: 10px;
+      border: 1px solid var(--border);
+      position: relative;
+    }
+    .interview-date-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
+    .interview-date { font-size: 14px; font-weight: 700; color: var(--text-primary); display: flex; align-items: center; gap: 6px; }
+    .interview-date svg { width: 14px; height: 14px; stroke: var(--blue-400); stroke-width: 2; fill: none; }
+    .interview-person { font-size: 12px; font-weight: 600; color: var(--text-secondary); display: flex; align-items: center; gap: 5px; }
+    .interview-person svg { width: 12px; height: 12px; stroke: var(--text-muted); stroke-width: 2; fill: none; }
+    .interview-actions { display: flex; gap: 6px; margin-top: 10px; }
+    .interview-btn {
+      padding: 6px 12px; border-radius: 8px;
+      font-family: var(--font); font-size: 11px; font-weight: 700;
+      cursor: pointer; border: none; transition: opacity 0.15s;
+    }
+    .interview-btn-edit { background: var(--blue-50); color: var(--blue-400); }
+    .interview-btn-delete { background: #fef2f2; color: var(--danger); }
+
+    .add-interview-btn {
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      padding: 12px; border-radius: var(--radius-md);
+      border: 1.5px dashed var(--blue-200);
+      background: var(--blue-50); color: var(--blue-400);
+      font-family: var(--font); font-size: 13px; font-weight: 700;
+      cursor: pointer; width: 100%; transition: background 0.15s;
+    }
+    .add-interview-btn:hover { background: var(--blue-100); }
+    .add-interview-btn svg { width: 16px; height: 16px; stroke: currentColor; stroke-width: 2; fill: none; }
+
+    /* ── ORDER STEP BADGE ── */
+    .step-num {
+      width: 22px; height: 22px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--blue-400), var(--blue-300));
+      color: white; font-size: 11px; font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+
+    /* ── TOAST ── */
+    .toast {
+      position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%) translateY(20px);
+      background: var(--blue-900); color: white;
+      padding: 12px 20px; border-radius: 40px;
+      font-size: 13px; font-weight: 600;
+      box-shadow: var(--shadow-lg);
+      z-index: 500; opacity: 0; transition: opacity 0.2s, transform 0.2s;
+      white-space: nowrap;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+    .toast svg { width: 15px; height: 15px; flex-shrink: 0; }
+
+    /* ── LOADING ── */
+    .loading {
+      display: flex; align-items: center; justify-content: center;
+      padding: 40px; gap: 12px; color: var(--text-muted); font-size: 14px; font-weight: 600;
+    }
+    .spinner {
+      width: 20px; height: 20px;
+      border: 2px solid var(--border);
+      border-top-color: var(--blue-400);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── COMPANY SEARCH LINK PILLS ── */
+    .search-links { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+    .search-link {
+      padding: 6px 12px;
+      border-radius: 20px;
+      background: var(--surface-2);
+      border: 1.5px solid var(--border);
+      font-size: 11px; font-weight: 700;
+      color: var(--text-secondary);
+      cursor: pointer;
+      display: flex; align-items: center; gap: 5px;
+      text-decoration: none;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .search-link:hover { background: var(--blue-50); border-color: var(--blue-200); color: var(--blue-500); }
+    .search-link svg { width: 12px; height: 12px; flex-shrink: 0; }
+
+    /* ── DETAIL ── */
+    .detail-company-row {
+      display: flex; align-items: center; gap: 16px;
+      margin-bottom: 12px;
+    }
+    .detail-logo {
+      width: 64px; height: 64px;
+      border-radius: var(--radius-md);
+      background: linear-gradient(135deg, var(--blue-100), var(--blue-50));
+      border: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 26px; font-weight: 700; color: var(--blue-500);
+      overflow: hidden; flex-shrink: 0;
+    }
+    .detail-logo img { width: 100%; height: 100%; object-fit: contain; }
+    .detail-name { font-size: 22px; font-weight: 700; color: var(--text-primary); }
+    .detail-sub { font-size: 13px; color: var(--text-secondary); font-weight: 500; margin-top: 2px; }
+
+    .info-box {
+      background: linear-gradient(135deg, var(--blue-50), #f0f7ff);
+      border: 1px solid var(--blue-100);
+      border-radius: var(--radius-md);
+      padding: 14px 16px;
+      margin-bottom: 14px;
+      font-size: 13px; color: var(--blue-600); font-weight: 500; line-height: 1.5;
+    }
+
+    /* ── COUNTER BADGE ── */
+    .counter-badge {
+      display: inline-flex; align-items: center; justify-content: center;
+      background: var(--blue-400); color: white;
+      width: 20px; height: 20px;
+      border-radius: 50%;
+      font-size: 11px; font-weight: 700;
+      margin-left: 8px;
+    }
+  </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="header">
+  <div class="header-inner">
+    <div class="logo-row">
+      <div class="logo-icon">
+        <svg viewBox="0 0 24 24"><path d="M20 7H4C2.9 7 2 7.9 2 9v10c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V9c0-1.1-.9-2-2-2zM12 2C9.24 2 7 4.24 7 7h2c0-1.66 1.34-3 3-3s3 1.34 3 3h2c0-2.76-2.24-5-5-5z"/></svg>
+      </div>
+      <div class="logo-text">Postul<span class="logo-on">'ON</span></div>
+    </div>
+    <div class="header-title">Candidatures en cours</div>
+    <div class="header-count" id="totalCount">—</div>
+    <div class="header-sub" id="headerSub">chargement…</div>
+    <div class="stats-row" id="statsRow"></div>
+  </div>
+</header>
+
+<!-- CONTENT -->
+<main class="content">
+  <div class="section-title">Processus de recrutement</div>
+  <div id="processList">
+    <div class="loading"><div class="spinner"></div>Chargement…</div>
+  </div>
+</main>
+
+<!-- FAB -->
+<button class="fab" onclick="goAddProcess()" title="Ajouter un processus">
+  <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+</button>
+
+<!-- TOAST -->
+<div class="toast" id="toast">
+  <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>
+  <span id="toastMsg"></span>
+</div>
+
+<!-- ═══════════════════════════════════════════════ OVERLAY: PROCESS DETAIL -->
+<div class="overlay" id="processDetailOverlay">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-header">
+      <div class="sheet-icon">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+      </div>
+      <div>
+        <div class="sheet-title">Détail du processus</div>
+        <div class="sheet-subtitle">Entretiens &amp; informations</div>
+      </div>
+      <button class="sheet-close" onclick="closeOverlay('processDetailOverlay')">
+        <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="sheet-body" id="processDetailBody">
+      <!-- filled dynamically -->
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════ OVERLAY: INTERVIEW FORM -->
+<div class="overlay" id="interviewFormOverlay">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-header">
+      <div class="sheet-icon">
+        <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      </div>
+      <div>
+        <div class="sheet-title" id="interviewFormTitle">Nouvel entretien</div>
+        <div class="sheet-subtitle">Date, heure &amp; interlocuteur</div>
+      </div>
+      <button class="sheet-close" onclick="closeOverlay('interviewFormOverlay')">
+        <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="sheet-body">
+      <input type="hidden" id="editInterviewId" />
+      <input type="hidden" id="interviewProcessId" />
+
+      <div class="form-group">
+        <label class="form-label">Date *</label>
+        <input class="form-input" type="date" id="interviewDate" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Heure *</label>
+        <input class="form-input" type="time" id="interviewTime" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Interlocuteur</label>
+        <input class="form-input" id="interviewPerson" placeholder="Prénom Nom — Poste" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Type d'entretien</label>
+        <select class="form-input form-select" id="interviewType">
+          <option value="RH">Entretien RH</option>
+          <option value="Technique">Entretien technique</option>
+          <option value="Manager">Entretien manager</option>
+          <option value="Direction">Entretien direction</option>
+          <option value="Autre">Autre</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Notes</label>
+        <textarea class="form-textarea" id="interviewNotes" placeholder="Liens, préparation, questions…"></textarea>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-secondary" onclick="closeOverlay('interviewFormOverlay')">Annuler</button>
+        <button class="btn btn-primary" onclick="saveInterview()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+          Enregistrer
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ════════════════════════════════════════════════════════════
+   STATE
+══════════════════════════════════════════════════════════════ */
+let processes = [];
+let interviews = [];
+let currentDetailId = null;
+
+/* ════════════════════════════════════════════════════════════
+   FIREBASE INIT
+══════════════════════════════════════════════════════════════ */
+function waitFirebase(cb) {
+  if (window.firebaseReady) { cb(); }
+  else { document.addEventListener('firebaseReady', cb, { once: true }); }
+}
+
+waitFirebase(() => {
+  listenProcesses();
+  listenInterviews();
+});
+
+function listenProcesses() {
+  const col = window._col('processes');
+  window._onSnapshot(col, snap => {
+    processes = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    renderList();
+  });
+}
+
+function listenInterviews() {
+  const col = window._col('interviews');
+  window._onSnapshot(col, snap => {
+    interviews = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    renderList();
+    if (currentDetailId) renderDetail(currentDetailId);
+  });
+}
+
+/* ════════════════════════════════════════════════════════════
+   HELPERS
+══════════════════════════════════════════════════════════════ */
+function nextInterview(processId) {
+  const now = new Date();
+  return interviews
+    .filter(i => i.processId === processId && new Date(i.date + 'T' + (i.time || '00:00')) >= now)
+    .sort((a, b) => new Date(a.date + 'T' + (a.time || '00:00')) - new Date(b.date + 'T' + (b.time || '00:00')))[0];
+}
+
+function allInterviews(processId) {
+  return interviews
+    .filter(i => i.processId === processId)
+    .sort((a, b) => new Date(a.date + 'T' + (a.time || '00:00')) - new Date(b.date + 'T' + (b.time || '00:00')));
+}
+
+function upcomingInterviewsCount(processId) {
+  const now = new Date();
+  return interviews.filter(i => i.processId === processId && new Date(i.date + 'T' + (i.time || '00:00')) >= now).length;
+}
+
+function formatDate(dateStr, timeStr) {
+  if (!dateStr) return 'Date inconnue';
+  const d = new Date(dateStr + 'T' + (timeStr || '00:00'));
+  return d.toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric', month: 'short' })
+    + (timeStr ? ' · ' + d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }) : '');
+}
+
+function daysUntil(dateStr) {
+  const now = new Date(); now.setHours(0,0,0,0);
+  const d = new Date(dateStr);
+  d.setHours(0,0,0,0);
+  return Math.round((d - now) / 86400000);
+}
+
+function badgeForDays(days) {
+  if (days === 0) return { cls: 'badge-today', label: "Aujourd'hui" };
+  if (days === 1) return { cls: 'badge-soon', label: 'Demain' };
+  if (days < 0)  return { cls: 'badge-done', label: 'Passé' };
+  if (days <= 7) return { cls: 'badge-soon', label: `Dans ${days}j` };
+  return { cls: 'badge-active', label: `Dans ${days}j` };
+}
+
+function initials(name) {
+  if (!name) return '?';
+  return name.split(' ').map(w => w[0]).join('').slice(0,2).toUpperCase();
+}
+
+function logoHtml(logoUrl, name) {
+  if (logoUrl) {
+    return `<img src="${escHtml(logoUrl)}" alt="${escHtml(name)}" onerror="this.parentNode.innerHTML='${initials(name)}'"/>`;
+  }
+  return initials(name);
+}
+
+function escHtml(s) {
+  return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+/* ════════════════════════════════════════════════════════════
+   RENDER LIST
+══════════════════════════════════════════════════════════════ */
+function getProcessGroup(p) {
+  const ni = nextInterview(p.id);
+  const total = allInterviews(p.id).length;
+  if (ni) return 1;       // a venir
+  if (total === 0) return 2; // aucun entretien
+  return 3;               // tous terminés
+}
+
+function renderList() {
+  const list = document.getElementById('processList');
+
+  // Tri : à venir (par date ASC), puis sans entretien, puis tous terminés
+  const sorted = [...processes].sort((a, b) => {
+    const ga = getProcessGroup(a);
+    const gb = getProcessGroup(b);
+    if (ga !== gb) return ga - gb;
+    if (ga === 1) {
+      const ni_a = nextInterview(a.id);
+      const ni_b = nextInterview(b.id);
+      return new Date(ni_a.date + 'T' + (ni_a.time || '00:00')) - new Date(ni_b.date + 'T' + (ni_b.time || '00:00'));
+    }
+    return 0;
+  });
+
+  // Stats
+  const withUpcoming = processes.filter(p => nextInterview(p.id)).length;
+  const totalUpcomingInterviews = interviews.filter(i => new Date(i.date + 'T' + (i.time || '00:00')) >= new Date()).length;
+
+  document.getElementById('totalCount').textContent = processes.length;
+  document.getElementById('headerSub').textContent =
+    processes.length <= 1 ? 'processus de recrutement' : 'processus de recrutement';
+
+  const statsRow = document.getElementById('statsRow');
+  statsRow.innerHTML = `
+    <div class="stat-pill"><div class="dot dot-blue"></div>${processes.length} processus</div>
+    <div class="stat-pill"><div class="dot dot-green"></div>${withUpcoming} actif${withUpcoming > 1 ? 's' : ''}</div>
+    <div class="stat-pill"><div class="dot dot-yellow"></div>${totalUpcomingInterviews} entretien${totalUpcomingInterviews > 1 ? 's' : ''} à venir</div>
+  `;
+
+  if (processes.length === 0) {
+    list.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon">
+          <svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/><line x1="12" y1="12" x2="12" y2="16"/><line x1="10" y1="14" x2="14" y2="14"/></svg>
+        </div>
+        <div class="empty-title">Aucune candidature</div>
+        <div class="empty-sub">Appuyez sur <strong>+</strong> pour ajouter votre première entreprise.</div>
+      </div>`;
+    return;
+  }
+
+  list.innerHTML = sorted.map(p => {
+    const ni = nextInterview(p.id);
+    const countAll = allInterviews(p.id).length;
+    const countUpcoming = upcomingInterviewsCount(p.id);
+    let badge = { cls: 'badge-none', label: 'Pas d\'entretien' };
+    let accentCls = 'accent-none';
+    let metaStr = '';
+
+    if (ni) {
+      const days = daysUntil(ni.date);
+      badge = badgeForDays(days);
+      accentCls = days <= 1 ? 'accent-active' : days <= 7 ? 'accent-pending' : 'accent-active';
+      metaStr = formatDate(ni.date, ni.time);
+    } else if (countAll > 0) {
+      badge = { cls: 'badge-done', label: 'Terminé' };
+      accentCls = 'accent-done';
+      metaStr = `${countAll} entretien${countAll > 1 ? 's' : ''} passé${countAll > 1 ? 's' : ''}`;
+    }
+
+    return `
+      <div class="process-card" onclick="openDetail('${p.id}')">
+        <div class="left-accent ${accentCls}"></div>
+        <div class="company-logo" style="margin-left:4px">${logoHtml(p.logoUrl, p.companyName)}</div>
+        <div class="card-info">
+          <div class="card-company">${escHtml(p.companyName)}</div>
+          ${ni ? `<div class="card-next">
+            <svg viewBox="0 0 24 24" fill="none" stroke="var(--blue-400)" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            <span style="color:var(--text-secondary);font-weight:600;font-size:12px">${escHtml(metaStr)}</span>
+          </div>` : `<div class="card-meta">${escHtml(metaStr) || 'Aucun entretien planifié'}</div>`}
+          ${countUpcoming > 0 ? `<div style="font-size:11px;color:var(--text-muted);font-weight:600;margin-top:3px">${countUpcoming} entretien${countUpcoming > 1 ? 's' : ''} à venir</div>` : ''}
+        </div>
+        <div class="card-badge ${badge.cls}">${badge.label}</div>
+      </div>
+    `;
+  }).join('');
+}
+
+/* ════════════════════════════════════════════════════════════
+   DETAIL SHEET
+══════════════════════════════════════════════════════════════ */
+function openDetail(id) {
+  currentDetailId = id;
+  renderDetail(id);
+  openOverlay('processDetailOverlay');
+}
+
+function renderDetail(id) {
+  const p = processes.find(x => x.id === id);
+  if (!p) return;
+  const ivs = allInterviews(id);
+  const body = document.getElementById('processDetailBody');
+
+  const googleUrl = `https://www.google.com/search?q=${encodeURIComponent((p.companyName || '') + ' recrutement emploi')}`;
+  const linkedinUrl = `https://www.linkedin.com/company/${encodeURIComponent((p.companyName || '').toLowerCase().replace(/\s+/g,'-'))}`;
+
+  const ivHtml = ivs.length === 0 ? `
+    <div style="text-align:center;padding:20px 0;color:var(--text-muted);font-size:13px;font-weight:600;">
+      Aucun entretien planifié
+    </div>
+  ` : ivs.map((iv, idx) => {
+    const days = daysUntil(iv.date);
+    const badge = badgeForDays(days);
+    return `
+      <div class="interview-item">
+        <div class="interview-date-row">
+          <div class="interview-date">
+            <div class="step-num">${idx + 1}</div>
+            ${iv.type ? `<span style="font-size:12px;color:var(--text-secondary);font-weight:600;">${escHtml(iv.type)}</span> · ` : ''}
+            ${formatDate(iv.date, iv.time)}
+          </div>
+          <span class="card-badge ${badge.cls}" style="font-size:10px">${badge.label}</span>
+        </div>
+        ${iv.person ? `<div class="interview-person">
+          <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          ${escHtml(iv.person)}
+        </div>` : ''}
+        ${iv.notes ? `<div style="font-size:12px;color:var(--text-secondary);margin-top:6px;line-height:1.5;">${escHtml(iv.notes)}</div>` : ''}
+        <div class="interview-actions">
+          <button class="interview-btn interview-btn-edit" onclick="openEditInterview('${iv.id}')">Modifier</button>
+          <button class="interview-btn interview-btn-delete" onclick="deleteInterview('${iv.id}')">Supprimer</button>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  body.innerHTML = `
+    <div class="detail-company-row">
+      <div class="detail-logo">${logoHtml(p.logoUrl, p.companyName)}</div>
+      <div>
+        <div class="detail-name">${escHtml(p.companyName)}</div>
+        <div class="detail-sub">${ivs.length} entretien${ivs.length > 1 ? 's' : ''} enregistré${ivs.length > 1 ? 's' : ''}</div>
+      </div>
+    </div>
+    <div class="search-links" style="margin-bottom:16px;">
+      <a class="search-link" href="${googleUrl}" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+        Google
+      </a>
+      <a class="search-link" href="${linkedinUrl}" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 8a6 6 0 016 6v7h-4v-7a2 2 0 00-2-2 2 2 0 00-2 2v7h-4v-7a6 6 0 016-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
+        LinkedIn
+      </a>
+    </div>
+    ${p.notes ? `<div class="info-box">${escHtml(p.notes)}</div>` : ''}
+    <div style="font-size:12px;font-weight:700;color:var(--text-secondary);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:12px;">
+      Entretiens
+      ${ivs.length > 0 ? `<span class="counter-badge">${ivs.length}</span>` : ''}
+    </div>
+    ${ivHtml}
+    <button class="add-interview-btn" onclick="openAddInterview('${id}')">
+      <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      Ajouter un entretien
+    </button>
+    <div class="divider"></div>
+    <div class="btn-row">
+      <button class="btn btn-secondary" onclick="goEditProcess('${id}')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:15px;height:15px"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        Modifier
+      </button>
+      <button class="btn btn-danger" onclick="deleteProcess('${id}')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:15px;height:15px"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+        Supprimer
+      </button>
+    </div>
+  `;
+}
+
+/* ════════════════════════════════════════════════════════════
+   NAVIGATION VERS LE FORMULAIRE PROCESSUS
+══════════════════════════════════════════════════════════════ */
+function goAddProcess() {
+  window.location.href = 'process-form.html';
+}
+
+function goEditProcess(id) {
+  window.location.href = 'process-form.html?id=' + id;
+}
+
+/* ════════════════════════════════════════════════════════════
+   PROCESS DELETE
+══════════════════════════════════════════════════════════════ */
+async function deleteProcess(id) {
+  if (!confirm('Supprimer ce processus et tous ses entretiens ?')) return;
+  const ivs = interviews.filter(i => i.processId === id);
+  for (const iv of ivs) {
+    await window._deleteDoc(window._doc('interviews', iv.id));
+  }
+  await window._deleteDoc(window._doc('processes', id));
+  closeOverlay('processDetailOverlay');
+  showToast('Processus supprimé');
+}
+
+/* ════════════════════════════════════════════════════════════
+   INTERVIEW CRUD
+══════════════════════════════════════════════════════════════ */
+function openAddInterview(processId) {
+  document.getElementById('interviewFormTitle').textContent = 'Nouvel entretien';
+  document.getElementById('editInterviewId').value = '';
+  document.getElementById('interviewProcessId').value = processId;
+  document.getElementById('interviewDate').value = '';
+  document.getElementById('interviewTime').value = '';
+  document.getElementById('interviewPerson').value = '';
+  document.getElementById('interviewType').value = 'RH';
+  document.getElementById('interviewNotes').value = '';
+  openOverlay('interviewFormOverlay');
+}
+
+function openEditInterview(id) {
+  const iv = interviews.find(x => x.id === id);
+  if (!iv) return;
+  document.getElementById('interviewFormTitle').textContent = "Modifier l'entretien";
+  document.getElementById('editInterviewId').value = id;
+  document.getElementById('interviewProcessId').value = iv.processId;
+  document.getElementById('interviewDate').value = iv.date || '';
+  document.getElementById('interviewTime').value = iv.time || '';
+  document.getElementById('interviewPerson').value = iv.person || '';
+  document.getElementById('interviewType').value = iv.type || 'RH';
+  document.getElementById('interviewNotes').value = iv.notes || '';
+  openOverlay('interviewFormOverlay');
+}
+
+async function saveInterview() {
+  const date = document.getElementById('interviewDate').value;
+  if (!date) { showToast('⚠️ La date est requise', true); return; }
+  const id = document.getElementById('editInterviewId').value;
+  const data = {
+    processId: document.getElementById('interviewProcessId').value,
+    date,
+    time: document.getElementById('interviewTime').value,
+    person: document.getElementById('interviewPerson').value.trim(),
+    type: document.getElementById('interviewType').value,
+    notes: document.getElementById('interviewNotes').value.trim(),
+  };
+  try {
+    if (id) {
+      await window._updateDoc(window._doc('interviews', id), data);
+      showToast('Entretien mis à jour ✓');
+    } else {
+      data.createdAt = window._Timestamp.now();
+      await window._addDoc(window._col('interviews'), data);
+      showToast('Entretien ajouté ✓');
+    }
+    // Retour à l'accueil : ferme tous les overlays
+    closeOverlay('interviewFormOverlay');
+    closeOverlay('processDetailOverlay');
+  } catch(e) {
+    console.error(e);
+    showToast('Erreur Firebase — vérifiez la config', true);
+  }
+}
+
+async function deleteInterview(id) {
+  if (!confirm('Supprimer cet entretien ?')) return;
+  await window._deleteDoc(window._doc('interviews', id));
+  showToast('Entretien supprimé');
+}
+
+/* ════════════════════════════════════════════════════════════
+   OVERLAYS
+══════════════════════════════════════════════════════════════ */
+function openOverlay(id) {
+  document.getElementById(id).classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeOverlay(id) {
+  document.getElementById(id).classList.remove('open');
+  const anyOpen = document.querySelector('.overlay.open');
+  if (!anyOpen) document.body.style.overflow = '';
+  if (id === 'processDetailOverlay') currentDetailId = null;
+}
+
+document.querySelectorAll('.overlay').forEach(el => {
+  el.addEventListener('click', e => {
+    if (e.target === el) closeOverlay(el.id);
+  });
+});
+
+/* ════════════════════════════════════════════════════════════
+   TOAST
+══════════════════════════════════════════════════════════════ */
+let toastTimer;
+function showToast(msg, isError = false) {
+  const toast = document.getElementById('toast');
+  document.getElementById('toastMsg').textContent = msg;
+  toast.style.background = isError ? 'var(--danger)' : 'var(--blue-900)';
+  toast.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => toast.classList.remove('show'), 2800);
+}
+</script>
+</body>
+</html>

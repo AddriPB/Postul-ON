@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Postul'ON — Processus</title>
+  <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+
+  <!-- Firebase SDK -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import {
+      getFirestore, collection, addDoc, doc,
+      getDoc, updateDoc, Timestamp
+    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+    // ─── FIREBASE CONFIG — Remplacez par votre propre config ───────────────────
+    const firebaseConfig = {
+      apiKey: "YOUR_API_KEY",
+      authDomain: "YOUR_PROJECT.firebaseapp.com",
+      projectId: "YOUR_PROJECT_ID",
+      storageBucket: "YOUR_PROJECT.appspot.com",
+      messagingSenderId: "YOUR_SENDER_ID",
+      appId: "YOUR_APP_ID"
+    };
+    // ───────────────────────────────────────────────────────────────────────────
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    window._db = db;
+    window._col = (name) => collection(db, name);
+    window._addDoc = addDoc;
+    window._doc = (path, ...args) => doc(db, path, ...args);
+    window._getDoc = getDoc;
+    window._updateDoc = updateDoc;
+    window._Timestamp = Timestamp;
+    window.firebaseReady = true;
+    document.dispatchEvent(new Event("firebaseReady"));
+  </script>
+
+  <style>
+    :root {
+      --blue-900: #0a1628;
+      --blue-800: #0d1f3c;
+      --blue-700: #102a50;
+      --blue-600: #1a3a6b;
+      --blue-500: #1e4d8c;
+      --blue-400: #2563c4;
+      --blue-300: #3b82f6;
+      --blue-200: #93c5fd;
+      --blue-100: #dbeafe;
+      --blue-50:  #eff6ff;
+
+      --accent: #3b82f6;
+      --accent-glow: rgba(59,130,246,0.35);
+      --gold: #f0c040;
+      --success: #22c55e;
+      --danger: #ef4444;
+      --warning: #f59e0b;
+
+      --bg: #f0f4f9;
+      --surface: #ffffff;
+      --surface-2: #f8faff;
+      --border: rgba(30,77,140,0.10);
+      --text-primary: #0a1628;
+      --text-secondary: #4b6b9a;
+      --text-muted: #94adc7;
+
+      --radius-sm: 10px;
+      --radius-md: 16px;
+      --radius-lg: 24px;
+      --radius-xl: 32px;
+
+      --shadow-sm: 0 2px 8px rgba(10,22,40,0.06);
+      --shadow-md: 0 4px 20px rgba(10,22,40,0.10);
+      --shadow-lg: 0 8px 32px rgba(10,22,40,0.14);
+      --shadow-accent: 0 4px 20px rgba(59,130,246,0.30);
+
+      --font: 'Quicksand', sans-serif;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--text-primary);
+      min-height: 100vh;
+      max-width: 430px;
+      margin: 0 auto;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--blue-200); border-radius: 4px; }
+
+    /* ── HEADER ── */
+    .header {
+      background: linear-gradient(145deg, var(--blue-900) 0%, var(--blue-700) 50%, var(--blue-500) 100%);
+      padding: 52px 24px 28px;
+      position: relative;
+      overflow: hidden;
+    }
+    .header::before {
+      content: '';
+      position: absolute;
+      top: -60px; right: -60px;
+      width: 200px; height: 200px;
+      background: radial-gradient(circle, rgba(59,130,246,0.25) 0%, transparent 70%);
+      border-radius: 50%;
+    }
+    .header::after {
+      content: '';
+      position: absolute;
+      bottom: -30px; left: -30px;
+      width: 140px; height: 140px;
+      background: radial-gradient(circle, rgba(59,130,246,0.15) 0%, transparent 70%);
+      border-radius: 50%;
+    }
+    .header-inner { position: relative; z-index: 1; }
+
+    .header-nav {
+      display: flex; align-items: center; gap: 12px;
+      margin-bottom: 24px;
+    }
+    .back-btn {
+      width: 36px; height: 36px;
+      background: rgba(255,255,255,0.12);
+      border: 1px solid rgba(255,255,255,0.18);
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+      transition: background 0.15s;
+      flex-shrink: 0;
+    }
+    .back-btn:hover { background: rgba(255,255,255,0.20); }
+    .back-btn svg { width: 18px; height: 18px; stroke: white; stroke-width: 2.5; fill: none; }
+
+    .logo-text { font-size: 20px; font-weight: 700; color: white; letter-spacing: -0.5px; }
+    .logo-text .logo-on { color: var(--gold); }
+
+    .header-icon {
+      width: 52px; height: 52px;
+      background: rgba(255,255,255,0.12);
+      border: 1px solid rgba(255,255,255,0.18);
+      border-radius: var(--radius-md);
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: 12px;
+    }
+    .header-icon svg { width: 26px; height: 26px; stroke: white; stroke-width: 1.8; fill: none; }
+    .header-title-text { font-size: 24px; font-weight: 700; color: white; line-height: 1.2; }
+    .header-subtitle { font-size: 13px; color: var(--blue-200); margin-top: 4px; font-weight: 500; }
+
+    /* ── CONTENT ── */
+    .content {
+      padding: 24px 16px 40px;
+    }
+
+    /* ── CARD ── */
+    .card {
+      background: var(--surface);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      box-shadow: var(--shadow-sm);
+      border: 1px solid var(--border);
+      margin-bottom: 16px;
+    }
+
+    /* ── FORM ── */
+    .form-group { margin-bottom: 20px; }
+    .form-label {
+      display: block;
+      font-size: 12px; font-weight: 700;
+      color: var(--text-secondary);
+      text-transform: uppercase; letter-spacing: 0.5px;
+      margin-bottom: 8px;
+    }
+    .form-input, .form-textarea {
+      width: 100%;
+      padding: 14px 16px;
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-md);
+      font-family: var(--font);
+      font-size: 15px; font-weight: 500;
+      color: var(--text-primary);
+      background: var(--surface-2);
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      -webkit-appearance: none;
+    }
+    .form-input:focus, .form-textarea:focus {
+      border-color: var(--blue-300);
+      box-shadow: 0 0 0 3px rgba(59,130,246,0.12);
+      background: var(--surface);
+    }
+    .form-textarea { resize: none; height: 100px; }
+
+    /* ── LOGO PREVIEW ── */
+    .logo-preview-row {
+      display: flex; align-items: center; gap: 14px; margin-bottom: 20px;
+    }
+    .logo-preview-box {
+      width: 64px; height: 64px;
+      border-radius: var(--radius-md);
+      background: var(--surface-2);
+      border: 2px dashed var(--border);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 24px; font-weight: 700;
+      color: var(--blue-300);
+      overflow: hidden; flex-shrink: 0;
+      transition: border-color 0.2s;
+    }
+    .logo-preview-box.has-logo { border-style: solid; border-color: var(--blue-100); }
+    .logo-preview-box img { width: 100%; height: 100%; object-fit: contain; }
+    .logo-actions { flex: 1; }
+    .logo-url-input {
+      width: 100%; padding: 12px 14px;
+      border: 1.5px solid var(--border); border-radius: var(--radius-md);
+      font-family: var(--font); font-size: 13px; font-weight: 500;
+      color: var(--text-primary); background: var(--surface-2); outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .logo-url-input:focus { border-color: var(--blue-300); box-shadow: 0 0 0 3px rgba(59,130,246,0.12); }
+    .logo-hint { font-size: 11px; color: var(--text-muted); margin-top: 6px; font-weight: 500; }
+
+    /* ── SEARCH SUGGESTIONS ── */
+    .suggestions-box {
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-md);
+      margin-top: 6px;
+      overflow: hidden;
+      box-shadow: var(--shadow-md);
+      display: none;
+    }
+    .suggestions-box.open { display: block; }
+    .suggestion-item {
+      padding: 12px 16px;
+      display: flex; align-items: center; gap: 12px;
+      cursor: pointer; border-bottom: 1px solid var(--border);
+      transition: background 0.1s;
+    }
+    .suggestion-item:last-child { border-bottom: none; }
+    .suggestion-item:hover { background: var(--blue-50); }
+    .suggestion-logo {
+      width: 36px; height: 36px; border-radius: 8px;
+      background: var(--surface-2); border: 1px solid var(--border);
+      overflow: hidden; display: flex; align-items: center; justify-content: center;
+      font-size: 14px; font-weight: 700; color: var(--blue-400); flex-shrink: 0;
+    }
+    .suggestion-logo img { width: 100%; height: 100%; object-fit: contain; }
+    .suggestion-name { font-size: 14px; font-weight: 600; color: var(--text-primary); }
+    .suggestion-domain { font-size: 11px; color: var(--text-muted); font-weight: 500; }
+
+    /* ── BUTTONS ── */
+    .btn {
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      padding: 15px 20px;
+      border: none; border-radius: var(--radius-md);
+      font-family: var(--font); font-size: 15px; font-weight: 700;
+      cursor: pointer; transition: transform 0.15s, box-shadow 0.15s, opacity 0.15s;
+      width: 100%;
+    }
+    .btn:active { transform: scale(0.97); }
+    .btn svg { width: 17px; height: 17px; flex-shrink: 0; }
+    .btn-primary {
+      background: linear-gradient(135deg, var(--blue-400), var(--blue-300));
+      color: white; box-shadow: var(--shadow-accent);
+    }
+    .btn-primary:hover { box-shadow: 0 6px 24px rgba(59,130,246,0.45); }
+    .btn-secondary {
+      background: var(--surface-2); color: var(--text-primary);
+      border: 1.5px solid var(--border);
+    }
+    .btn-row { display: flex; gap: 10px; }
+    .btn-row .btn { flex: 1; }
+
+    /* ── TOAST ── */
+    .toast {
+      position: fixed; bottom: 32px; left: 50%; transform: translateX(-50%) translateY(20px);
+      background: var(--blue-900); color: white;
+      padding: 12px 20px; border-radius: 40px;
+      font-size: 13px; font-weight: 600;
+      box-shadow: var(--shadow-lg);
+      z-index: 500; opacity: 0; transition: opacity 0.2s, transform 0.2s;
+      white-space: nowrap;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    /* ── LOADING ── */
+    .loading-overlay {
+      position: fixed; inset: 0;
+      background: rgba(240,244,249,0.85);
+      display: flex; align-items: center; justify-content: center;
+      z-index: 300; gap: 12px;
+      font-size: 14px; font-weight: 600; color: var(--text-secondary);
+      backdrop-filter: blur(2px);
+    }
+    .loading-overlay.hidden { display: none; }
+    .spinner {
+      width: 22px; height: 22px;
+      border: 2px solid var(--border);
+      border-top-color: var(--blue-400);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── SECTION LABEL ── */
+    .section-label {
+      font-size: 11px; font-weight: 700;
+      color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px;
+      margin-bottom: 12px;
+    }
+  </style>
+</head>
+<body>
+
+<!-- LOADING -->
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="spinner"></div>Chargement…
+</div>
+
+<!-- HEADER -->
+<header class="header">
+  <div class="header-inner">
+    <div class="header-nav">
+      <button class="back-btn" onclick="goBack()" title="Retour">
+        <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+      </button>
+      <div class="logo-text">Postul<span class="logo-on">'ON</span></div>
+    </div>
+    <div class="header-icon">
+      <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M8 12h8M12 8v8"/></svg>
+    </div>
+    <div class="header-title-text" id="pageTitle">Nouveau processus</div>
+    <div class="header-subtitle">Renseignez les informations de l'entreprise</div>
+  </div>
+</header>
+
+<!-- CONTENT -->
+<main class="content">
+
+  <div class="card">
+    <div class="section-label">Entreprise</div>
+
+    <div class="form-group">
+      <label class="form-label">Nom de l'entreprise *</label>
+      <input class="form-input" id="companyName" placeholder="Ex: Google, Spotify…" autocomplete="off" oninput="onCompanyNameInput()" />
+      <div class="suggestions-box" id="suggestionsBox"></div>
+    </div>
+
+    <div class="section-label" style="margin-top:4px;">Logo</div>
+    <div class="logo-preview-row">
+      <div class="logo-preview-box" id="logoPreview">?</div>
+      <div class="logo-actions">
+        <input class="logo-url-input" id="logoUrl" placeholder="URL du logo ou du favicon…" oninput="onLogoUrlInput()" />
+        <div class="logo-hint">Ex: https://logo.clearbit.com/google.com</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="section-label">Notes</div>
+    <div class="form-group" style="margin-bottom:0">
+      <textarea class="form-textarea" id="processNotes" placeholder="Rémunération visée, contact RH, stack technique, lien offre…"></textarea>
+    </div>
+  </div>
+
+  <div class="btn-row" style="margin-top:8px;">
+    <button class="btn btn-secondary" onclick="goBack()">Annuler</button>
+    <button class="btn btn-primary" onclick="saveProcess()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+      Enregistrer
+    </button>
+  </div>
+
+</main>
+
+<!-- TOAST -->
+<div class="toast" id="toast">
+  <span id="toastMsg"></span>
+</div>
+
+<script>
+/* ════════════════════════════════════════════════════════════
+   INIT
+══════════════════════════════════════════════════════════════ */
+const urlParams = new URLSearchParams(window.location.search);
+const editId = urlParams.get('id');
+
+function waitFirebase(cb) {
+  if (window.firebaseReady) { cb(); }
+  else { document.addEventListener('firebaseReady', cb, { once: true }); }
+}
+
+waitFirebase(async () => {
+  if (editId) {
+    document.getElementById('pageTitle').textContent = 'Modifier le processus';
+    await loadProcess(editId);
+  }
+  document.getElementById('loadingOverlay').classList.add('hidden');
+});
+
+async function loadProcess(id) {
+  try {
+    const snap = await window._getDoc(window._doc('processes', id));
+    if (!snap.exists()) { goBack(); return; }
+    const p = snap.data();
+    document.getElementById('companyName').value = p.companyName || '';
+    document.getElementById('logoUrl').value = p.logoUrl || '';
+    document.getElementById('processNotes').value = p.notes || '';
+    updateLogoPreview(p.logoUrl, p.companyName);
+  } catch(e) {
+    console.error(e);
+    showToast('Erreur de chargement', true);
+  }
+}
+
+/* ════════════════════════════════════════════════════════════
+   SAVE
+══════════════════════════════════════════════════════════════ */
+async function saveProcess() {
+  const name = document.getElementById('companyName').value.trim();
+  if (!name) { showToast('⚠️ Le nom est requis', true); return; }
+
+  const data = {
+    companyName: name,
+    logoUrl: document.getElementById('logoUrl').value.trim(),
+    notes: document.getElementById('processNotes').value.trim(),
+  };
+
+  try {
+    if (editId) {
+      await window._updateDoc(window._doc('processes', editId), data);
+      showToast('Processus mis à jour ✓');
+    } else {
+      data.createdAt = window._Timestamp.now();
+      await window._addDoc(window._col('processes'), data);
+      showToast('Processus ajouté ✓');
+    }
+    // Retour à l'accueil après enregistrement
+    setTimeout(() => { window.location.href = 'index.html'; }, 600);
+  } catch(e) {
+    console.error(e);
+    showToast('Erreur Firebase — vérifiez la config', true);
+  }
+}
+
+/* ════════════════════════════════════════════════════════════
+   NAVIGATION
+══════════════════════════════════════════════════════════════ */
+function goBack() {
+  window.location.href = 'index.html';
+}
+
+/* ════════════════════════════════════════════════════════════
+   LOGO / AUTOCOMPLETE
+══════════════════════════════════════════════════════════════ */
+let searchTimeout = null;
+
+function onCompanyNameInput() {
+  const val = document.getElementById('companyName').value.trim();
+  clearTimeout(searchTimeout);
+  if (val.length < 2) { closeSuggestions(); return; }
+  searchTimeout = setTimeout(() => fetchCompanySuggestions(val), 500);
+}
+
+async function fetchCompanySuggestions(query) {
+  try {
+    const res = await fetch(`https://autocomplete.clearbit.com/v1/companies/suggest?query=${encodeURIComponent(query)}`);
+    if (!res.ok) { closeSuggestions(); return; }
+    const data = await res.json();
+    showSuggestions(data.slice(0, 5));
+  } catch(e) {
+    closeSuggestions();
+  }
+}
+
+function showSuggestions(companies) {
+  const box = document.getElementById('suggestionsBox');
+  if (!companies || companies.length === 0) { closeSuggestions(); return; }
+  box.innerHTML = companies.map(c => `
+    <div class="suggestion-item" onclick="selectCompany('${escHtml(c.name)}','${escHtml(c.logo || '')}')">
+      <div class="suggestion-logo">
+        ${c.logo ? `<img src="${escHtml(c.logo)}" onerror="this.parentNode.innerHTML='${initials(c.name)}'"/>` : initials(c.name)}
+      </div>
+      <div>
+        <div class="suggestion-name">${escHtml(c.name)}</div>
+        <div class="suggestion-domain">${escHtml(c.domain || '')}</div>
+      </div>
+    </div>
+  `).join('');
+  box.classList.add('open');
+}
+
+function selectCompany(name, logo) {
+  document.getElementById('companyName').value = name;
+  if (logo) {
+    document.getElementById('logoUrl').value = logo;
+    updateLogoPreview(logo, name);
+  } else {
+    const domain = name.toLowerCase().replace(/\s+/g, '') + '.com';
+    const clearbitUrl = `https://logo.clearbit.com/${domain}`;
+    document.getElementById('logoUrl').value = clearbitUrl;
+    updateLogoPreview(clearbitUrl, name);
+  }
+  closeSuggestions();
+}
+
+function closeSuggestions() {
+  document.getElementById('suggestionsBox').classList.remove('open');
+}
+
+function onLogoUrlInput() {
+  const url = document.getElementById('logoUrl').value.trim();
+  const name = document.getElementById('companyName').value.trim();
+  updateLogoPreview(url, name);
+}
+
+function updateLogoPreview(url, name) {
+  const box = document.getElementById('logoPreview');
+  if (url) {
+    box.classList.add('has-logo');
+    box.innerHTML = `<img src="${escHtml(url)}" alt="logo" onerror="this.parentNode.innerHTML='${initials(name)}';this.parentNode.classList.remove('has-logo')"/>`;
+  } else {
+    box.classList.remove('has-logo');
+    box.innerHTML = initials(name) || '?';
+  }
+}
+
+/* ════════════════════════════════════════════════════════════
+   UTILS
+══════════════════════════════════════════════════════════════ */
+function initials(name) {
+  if (!name) return '?';
+  return name.split(' ').map(w => w[0]).join('').slice(0,2).toUpperCase();
+}
+
+function escHtml(s) {
+  return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+let toastTimer;
+function showToast(msg, isError = false) {
+  const toast = document.getElementById('toast');
+  document.getElementById('toastMsg').textContent = msg;
+  toast.style.background = isError ? 'var(--danger)' : 'var(--blue-900)';
+  toast.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => toast.classList.remove('show'), 2800);
+}
+
+// Ferme les suggestions si on clique ailleurs
+document.addEventListener('click', e => {
+  if (!e.target.closest('#suggestionsBox') && !e.target.closest('#companyName')) {
+    closeSuggestions();
+  }
+});
+</script>
+</body>
+</html>
