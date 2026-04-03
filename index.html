@@ -549,17 +549,37 @@ waitFirebase(() => {
 });
 
 function listenProcesses() {
-  window._onSnapshot(getCol('processes'), snap => {
-    processes = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-    renderList();
-  });
+  window._onSnapshot(
+    getCol('processes'),
+    snap => {
+      processes = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      renderList();
+    },
+    err => {
+      console.error('Firestore listen error (processes):', err);
+      if (err.code === 'permission-denied') {
+        document.getElementById('processList').innerHTML = `
+          <div style="margin:20px 0;padding:20px;background:#fef2f2;border:1.5px solid #fecaca;border-radius:16px;font-size:13px;color:#b91c1c;font-weight:600;line-height:1.7;">
+            ⛔ <strong>Accès Firestore refusé</strong><br>
+            Allez dans la Console Firebase :<br>
+            <span style="font-family:monospace;font-size:11px;">Firestore Database → Règles</span><br>
+            et remplacez les règles par :<br>
+            <span style="font-family:monospace;font-size:11px;background:#fee2e2;padding:2px 6px;border-radius:4px;display:inline-block;margin-top:4px;">allow read, write: if true;</span>
+          </div>`;
+      }
+    }
+  );
 }
 function listenInterviews() {
-  window._onSnapshot(getCol('interviews'), snap => {
-    interviews = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-    renderList();
-    if (currentDetailId) renderDetail(currentDetailId);
-  });
+  window._onSnapshot(
+    getCol('interviews'),
+    snap => {
+      interviews = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      renderList();
+      if (currentDetailId) renderDetail(currentDetailId);
+    },
+    err => { console.error('Firestore listen error (interviews):', err); }
+  );
 }
 
 /* ════ FAB ════ */
@@ -833,17 +853,21 @@ async function saveInterview() {
   try {
     if (id) {
       await window._updateDoc(getDocRef('interviews', id), data);
-      showToast('Entretien mis à jour ✓');
     } else {
       data.createdAt = window._Timestamp.now();
       await window._addDoc(getCol('interviews'), data);
-      showToast('Entretien ajouté ✓');
     }
     closeOverlay('interviewFormOverlay');
     closeOverlay('processDetailOverlay');
   } catch(e) {
-    console.error(e);
-    showToast('Erreur Firebase', true);
+    console.error('Erreur Firebase saveInterview:', e);
+    let msg = '⚠️ Erreur Firebase';
+    if (e.code === 'permission-denied' || (e.message && e.message.includes('permission'))) {
+      msg = '⛔ Accès refusé — mettez à jour vos règles Firestore (Console Firebase > Firestore > Règles)';
+    } else if (e.code === 'unavailable') {
+      msg = '📶 Pas de connexion internet';
+    }
+    showToast(msg, true);
   }
 }
 

@@ -229,6 +229,42 @@
     .spinner { width: 18px; height: 18px; border: 2px solid var(--border); border-top-color: var(--blue-400); border-radius: 50%; animation: spin 0.8s linear infinite; }
     @keyframes spin { to { transform: rotate(360deg); } }
 
+    /* ── BOUTON ÉTAT CHARGEMENT ── */
+    .btn-primary:disabled {
+      opacity: 0.65; cursor: not-allowed; transform: none;
+    }
+    .btn-saving { gap: 10px; }
+    .btn-spinner {
+      width: 15px; height: 15px;
+      border: 2px solid rgba(255,255,255,0.35);
+      border-top-color: white;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      flex-shrink: 0;
+    }
+
+    /* ── BANNIÈRE ERREUR FIREBASE ── */
+    .error-banner {
+      position: fixed; bottom: 0; left: 50%; transform: translateX(-50%) translateY(100%);
+      width: 100%; max-width: 430px;
+      background: #1a0a0a;
+      border-top: 3px solid var(--danger);
+      padding: 16px 18px;
+      display: flex; align-items: flex-start; gap: 12px;
+      z-index: 600; transition: transform 0.3s cubic-bezier(0.34,1.20,0.64,1);
+    }
+    .error-banner.show { transform: translateX(-50%) translateY(0); }
+    .error-banner-icon { flex-shrink: 0; color: var(--danger); margin-top: 1px; }
+    .error-banner-icon svg { width: 20px; height: 20px; }
+    .error-banner-content { flex: 1; min-width: 0; }
+    .error-banner-title { font-size: 14px; font-weight: 700; color: #fff; margin-bottom: 4px; }
+    .error-banner-msg { font-size: 12px; color: #fca5a5; font-weight: 500; line-height: 1.5; word-break: break-word; white-space: pre-line; }
+    .error-banner-close {
+      flex-shrink: 0; background: none; border: none; cursor: pointer;
+      color: rgba(255,255,255,0.5); padding: 2px; margin-top: -2px;
+    }
+    .error-banner-close svg { width: 16px; height: 16px; }
+
     /* ── TOAST ── */
     .toast {
       position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%) translateY(20px);
@@ -255,9 +291,6 @@
         <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
       </button>
       <div class="logo-text">Postul<span class="logo-on">'ON</span></div>
-    </div>
-    <div class="header-icon">
-      <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M8 12h8M12 8v8"/></svg>
     </div>
     <div class="header-title-text" id="pageTitle">Nouveau processus</div>
     <div class="header-subtitle">Informations de l'entreprise</div>
@@ -296,7 +329,7 @@
 
   <div class="btn-row">
     <button class="btn btn-secondary" onclick="goBack()">Annuler</button>
-    <button class="btn btn-primary" onclick="saveProcess()">
+    <button class="btn btn-primary" id="saveBtn" onclick="saveProcess()">
       <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
       Enregistrer
     </button>
@@ -306,6 +339,20 @@
 
 <!-- TOAST -->
 <div class="toast" id="toast"></div>
+
+<!-- BANNIÈRE ERREUR FIREBASE -->
+<div class="error-banner" id="errorBanner">
+  <div class="error-banner-icon">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+  </div>
+  <div class="error-banner-content">
+    <div class="error-banner-title">Erreur d'enregistrement</div>
+    <div class="error-banner-msg" id="errorBannerMsg"></div>
+  </div>
+  <button class="error-banner-close" onclick="document.getElementById('errorBanner').classList.remove('show')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+  </button>
+</div>
 
 <script>
 /* ════ GUARD : code requis ════ */
@@ -329,7 +376,14 @@ function waitFirebase(cb) {
   else document.addEventListener('firebaseReady', cb, { once: true });
 }
 
+// Timeout de sécurité : si Firebase ne répond pas en 8s
+const fbTimeout = setTimeout(() => {
+  document.getElementById('loadingScreen').classList.add('hidden');
+  showFirebaseError('Firebase ne répond pas.\nVérifiez votre config (apiKey, projectId) et votre connexion internet.');
+}, 8000);
+
 waitFirebase(async () => {
+  clearTimeout(fbTimeout);
   if (editId) {
     document.getElementById('pageTitle').textContent = 'Modifier le processus';
     await loadProcess(editId);
@@ -355,26 +409,56 @@ async function loadProcess(id) {
 
 /* ════ SAVE ════ */
 async function saveProcess() {
+  // Vérification que Firebase est prêt
+  if (!window._addDoc || !window._db) {
+    showFirebaseError('Firebase non initialisé. Rechargez la page.');
+    return;
+  }
+
   const name = document.getElementById('companyName').value.trim();
   if (!name) { showToast('⚠️ Le nom est requis', true); return; }
+
+  // Désactiver le bouton + spinner pendant la sauvegarde
+  const saveBtn = document.getElementById('saveBtn');
+  saveBtn.disabled = true;
+  saveBtn.classList.add('btn-saving');
+  saveBtn.innerHTML = '<div class="btn-spinner"></div>Enregistrement…';
+
   const data = {
     companyName: name,
     logoUrl: document.getElementById('logoUrl').value.trim(),
     notes: document.getElementById('processNotes').value.trim(),
   };
+
   try {
     if (editId) {
       await window._updateDoc(getDocRef('processes', editId), data);
-      showToast('Processus mis à jour ✓');
     } else {
       data.createdAt = window._Timestamp.now();
       await window._addDoc(getCol('processes'), data);
-      showToast('Processus ajouté ✓');
     }
-    setTimeout(() => { window.location.href = 'index.html'; }, 600);
+    // Succès → retour accueil
+    window.location.href = 'index.html';
   } catch(e) {
-    console.error(e);
-    showToast('Erreur Firebase', true);
+    console.error('Erreur Firebase saveProcess:', e);
+
+    // Réactiver le bouton
+    saveBtn.disabled = false;
+    saveBtn.classList.remove('btn-saving');
+    saveBtn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>Enregistrer`;
+
+    // Message d'erreur précis
+    let msg;
+    if (e.code === 'permission-denied' || (e.message && e.message.includes('permission'))) {
+      msg = '⛔ Règles Firestore bloquent l\'écriture.\n→ Console Firebase > Firestore Database > Règles > remplacez par :\nallow read, write: if true;';
+    } else if (e.code === 'unavailable' || e.code === 'network-request-failed') {
+      msg = '📶 Pas de connexion internet. Vérifiez votre réseau.';
+    } else if (e.code === 'not-found') {
+      msg = '🔍 Document introuvable dans Firestore.';
+    } else {
+      msg = `Code: ${e.code || '?'}\n${e.message || String(e)}`;
+    }
+    showFirebaseError(msg);
   }
 }
 
@@ -456,6 +540,14 @@ function showToast(msg, isError = false) {
   t.classList.add('show');
   clearTimeout(toastTimer);
   toastTimer = setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+function showFirebaseError(msg) {
+  const banner = document.getElementById('errorBanner');
+  document.getElementById('errorBannerMsg').textContent = msg;
+  banner.classList.add('show');
+  // Auto-fermeture après 10s
+  setTimeout(() => banner.classList.remove('show'), 10000);
 }
 
 document.addEventListener('click', e => {
